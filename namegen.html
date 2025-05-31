@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="page_title_name_gen_ru">Генератор Русских Имён</title>
+    <style>
+        :root {
+            /* Light Theme (from code (6).html) */
+            --bg-color: #f4f7f9;
+            --primary-color: #ffffff;
+            --secondary-color: #e9eff3;
+            --accent-color: #007bff;
+            --accent-hover-color: #0056b3;
+            --text-color: #333333;
+            --text-light-color: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html.dark-theme {
+            /* Dark Theme (from code (6).html) */
+            --bg-color: #1e1e2f;
+            --primary-color: #2c2c44;
+            --secondary-color: #3b3b58;
+            --accent-color: #89b4fa;
+            --accent-hover-color: #6c95c7;
+            --text-color: #cdd6f4;
+            --text-light-color: #11111b;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color);
+            line-height: 1.6; display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding: 20px; padding-top: 80px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .top-controls {
+            position: fixed; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 1000;
+        }
+        .top-controls .control-btn {
+            background-color: var(--primary-color); color: var(--accent-color);
+            border: 1px solid var(--secondary-color); width: 45px; height: 45px;
+            border-radius: var(--border-radius); cursor: pointer; font-size: 1.6em;
+            display: flex; align-items: center; justify-content: center; text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+        .top-controls .control-btn:hover {
+            background-color: var(--secondary-color); transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+        .top-controls .control-btn:active { transform: translateY(0px); box-shadow: 0 2px 5px var(--shadow-color); }
+
+        header { text-align: center; margin-bottom: 20px; }
+        header h1 { font-size: 2.2em; color: var(--accent-color); transition: color 0.3s ease; }
+
+        .tool-container {
+            background-color: var(--primary-color); padding: 25px; border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px var(--shadow-color); width: 100%; max-width: 500px;
+            text-align: center;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .gender-selection {
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .gender-selection label {
+            cursor: pointer;
+            padding: 8px 15px;
+            border: 1px solid var(--secondary-color);
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .gender-selection input[type="radio"] {
+            display: none; /* Hide default radio */
+        }
+        .gender-selection input[type="radio"]:checked + label {
+            background-color: var(--accent-color);
+            color: var(--text-light-color);
+            border-color: var(--accent-color);
+        }
+        .gender-selection label:hover {
+             background-color: color-mix(in srgb, var(--secondary-color) 70%, transparent);
+        }
+        html.dark-theme .gender-selection label:hover {
+            background-color: color-mix(in srgb, var(--secondary-color) 70%, transparent);
+        }
+         html.dark-theme .gender-selection input[type="radio"]:checked + label {
+             color: var(--text-light-color); /* Ensure dark text on accent for dark theme */
+         }
+
+
+        #generateNameBtnRu {
+            background-color: var(--accent-color); color: var(--text-light-color);
+            border: none; padding: 12px 25px; border-radius: var(--border-radius);
+            font-size: 1.1em; font-weight: bold; cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            margin-bottom: 25px;
+        }
+        #generateNameBtnRu:hover {
+            background-color: var(--accent-hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+        #generateNameBtnRu:active { transform: translateY(0px); }
+
+        #generatedNameOutput {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--text-color); /* Text color for the name itself */
+            padding: 20px;
+            border: 2px dashed var(--secondary-color);
+            border-radius: var(--border-radius);
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+        #generatedNameOutput.placeholder {
+            color: color-mix(in srgb, var(--text-color) 60%, transparent);
+            font-style: italic;
+            font-weight: normal;
+            font-size: 1.5em;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            body { padding-top: 70px; padding-left:10px; padding-right:10px; }
+            .top-controls { top:10px; right:10px; gap: 8px; }
+            .top-controls .control-btn { width: 40px; height: 40px; font-size: 1.4em; }
+            header h1 { font-size: 1.8em; }
+            .tool-container { padding: 15px; max-width: 100%; }
+            .gender-selection { flex-direction: column; align-items: stretch; gap: 10px;}
+            .gender-selection label { text-align: center; }
+            #generatedNameOutput { font-size: 1.5em; }
+            #generatedNameOutput.placeholder {font-size: 1.2em; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-controls">
+        <a href="index.html" id="back-to-main" class="control-btn" title="На главную">⬅️</a>
+        <button id="theme-switcher" class="control-btn" title="Переключить тему">🌙</button>
+        <button id="language-switcher" class="control-btn" title="Сменить язык">🌍</button>
+    </div>
+
+    <header>
+        <h1 data-lang-key="tool_title_name_gen_ru">Генератор Русских Имён</h1>
+    </header>
+
+    <main class="tool-container">
+        <div class="gender-selection">
+            <input type="radio" id="genderMale" name="gender" value="male" checked>
+            <label for="genderMale" data-lang-key="label_male">Мужской</label>
+
+            <input type="radio" id="genderFemale" name="gender" value="female">
+            <label for="genderFemale" data-lang-key="label_female">Женский</label>
+        </div>
+
+        <button id="generateNameBtnRu" data-lang-key="btn_generate_name">Сгенерировать Имя</button>
+
+        <div id="generatedNameOutput" class="placeholder" data-lang-key="placeholder_generated_name">
+            Нажмите "Сгенерировать Имя"
+        </div>
+    </main>
+
+    <script>
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const languageSwitcher = document.getElementById('language-switcher');
+        const backToMainBtn = document.getElementById('back-to-main');
+        const htmlElement = document.documentElement;
+
+        const generateBtnRu = document.getElementById('generateNameBtnRu');
+        const nameOutputEl = document.getElementById('generatedNameOutput');
+        const genderMaleRadio = document.getElementById('genderMale');
+        // const genderFemaleRadio = document.getElementById('genderFemale'); // Not strictly needed if using querySelector
+
+        const langData = {
+            ru: {
+                page_title_name_gen_ru: "Генератор Русских Имён",
+                tool_title_name_gen_ru: "Генератор Русских Имён",
+                label_male: "Мужской",
+                label_female: "Женский",
+                btn_generate_name: "Сгенерировать Имя",
+                placeholder_generated_name: "Нажмите \"Сгенерировать Имя\"",
+                theme_switch_title: "Переключить тему",
+                lang_switch_title: "Сменить язык",
+                back_to_main_title: "На главную"
+            },
+            en: { // Basic English translations for UI elements
+                page_title_name_gen_ru: "Russian Name Generator",
+                tool_title_name_gen_ru: "Russian Name Generator",
+                label_male: "Male",
+                label_female: "Female",
+                btn_generate_name: "Generate Name",
+                placeholder_generated_name: "Click \"Generate Name\"",
+                theme_switch_title: "Switch Theme",
+                lang_switch_title: "Switch Language",
+                back_to_main_title: "Back to Main"
+            }
+        };
+
+        let currentLang = localStorage.getItem('preferredLang') || 'ru';
+        let currentTheme = localStorage.getItem('preferredTheme') || 'light';
+
+        // Russian Name Data
+        const maleFirstNames = ["Александр", "Дмитрий", "Максим", "Сергей", "Андрей", "Алексей", "Артём", "Илья", "Кирилл", "Михаил", "Никита", "Роман", "Егор", "Иван", "Владимир", "Павел", "Денис", "Евгений", "Ярослав", "Тимур", "Олег", "Виктор", "Константин", "Григорий", "Степан"];
+        const femaleFirstNames = ["Анастасия", "Мария", "Анна", "Дарья", "Екатерина", "Виктория", "Елизавета", "Полина", "София", "Александра", "Ксения", "Варвара", "Алиса", "Вероника", "Арина", "Валерия", "Милана", "Ульяна", "Ева", "Татьяна", "Ольга", "Наталья", "Ирина", "Светлана", "Елена"];
+        const lastNamesBase = ["Иванов", "Смирнов", "Кузнецов", "Попов", "Васильев", "Петров", "Соколов", "Михайлов", "Новиков", "Фёдоров", "Морозов", "Волков", "Алексеев", "Лебедев", "Семёнов", "Егоров", "Павлов", "Козлов", "Степанов", "Николаев", "Орлов", "Андреев", "Макаров", "Захаров", "Белов", "Гусев", "Титов", "Кузьмин", "Соловьёв", "Виноградов", "Богданов", "Воробьёв", "Комаров", "Сидоров", "Беляев", "Тарасов", "Юдин", "Белый", "Крылов", "Романов", "Зайцев", "Шевченко", "Мельник", "Ковальчук", "Покровский", "Журавлёв", "Островский", "Савельев"];
+
+        function getRandomElement(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generatePatronymic(fatherName, gender) {
+            if (!fatherName) return "";
+            let patronymicBase = fatherName;
+            const lastChar = fatherName.slice(-1).toLowerCase();
+            const secondLastChar = fatherName.slice(-2, -1).toLowerCase();
+
+            let suffix = "";
+            if (gender === "male") {
+                if (['й', 'ь'].includes(lastChar) || (['г', 'к', 'х', 'ж', 'ш', 'щ', 'ч'].includes(lastChar) && secondLastChar !== 'и')) {
+                    patronymicBase = fatherName.slice(0, -1); // Remove soft sign or 'й'
+                    suffix = "евич";
+                } else if (vowels("аеёиоуыэюя").includes(secondLastChar) && lastChar === 'й') { // Андрей -> Андреевич
+                     patronymicBase = fatherName.slice(0, -1);
+                     suffix = "евич";
+                } else if (vowels("аеёиоуыэюя").includes(lastChar)) { // Никита -> Никитич (special case, common is Никитович)
+                    // Most common is -ович for vowel endings, except for specific names
+                    suffix = "ович";
+                }
+                else {
+                    suffix = "ович";
+                }
+            } else { // female
+                 if (['й', 'ь'].includes(lastChar) || (['г', 'к', 'х', 'ж', 'ш', 'щ', 'ч'].includes(lastChar) && secondLastChar !== 'и')) {
+                    patronymicBase = fatherName.slice(0, -1);
+                    suffix = "евна";
+                } else if (vowels("аеёиоуыэюя").includes(secondLastChar) && lastChar === 'й') {
+                     patronymicBase = fatherName.slice(0, -1);
+                     suffix = "евна";
+                } else if (vowels("аеёиоуыэюя").includes(lastChar)) {
+                    suffix = "овна";
+                }
+                else {
+                    suffix = "овна";
+                }
+            }
+            // Special handling for names like Илья -> Ильич/Ильинична (simpler: Иль_евич/евна)
+            if (fatherName === "Илья") patronymicBase = "Иль"; // Ильевич/Ильевна (common modern form)
+            if (fatherName === "Лев") patronymicBase = "Льв"; // Львович/Львовна
+            if (fatherName === "Яков") patronymicBase = "Яковл"; // Яковлевич/Яковлевна (needs 'ев'/'евн') - fixed above
+
+            return patronymicBase + suffix;
+        }
+        function vowels(str) { return str.split(''); } // Helper
+
+        function getFeminineLastName(lastName) {
+            if (lastName.endsWith("ов") || lastName.endsWith("ев") || lastName.endsWith("ёв") || lastName.endsWith("ин")) {
+                return lastName + "а"; // Иванова, Смирнова, Путина
+            } else if (lastName.endsWith("ый") || lastName.endsWith("ий")) { // Белый, Островский
+                return lastName.slice(0, -2) + "ая"; // Белая, Островская
+            } else if (lastName.endsWith("ский") || lastName.endsWith("цкий")) { // Покровский
+                 return lastName.slice(0, -2) + "ая"; // Покровская
+            }
+            // For invariable names like Шевченко, Мельник, or already feminine names
+            return lastName;
+        }
+
+
+        function generateName() {
+            const selectedGender = document.querySelector('input[name="gender"]:checked').value;
+            let firstName, patronymic;
+            const lastNameBase = getRandomElement(lastNamesBase);
+            let lastName = lastNameBase;
+
+            const fatherName = getRandomElement(maleFirstNames); // Patronymic always from a male name
+
+            if (selectedGender === "male") {
+                firstName = getRandomElement(maleFirstNames);
+                patronymic = generatePatronymic(fatherName, "male");
+                // Male last names are usually the base form
+            } else { // female
+                firstName = getRandomElement(femaleFirstNames);
+                patronymic = generatePatronymic(fatherName, "female");
+                lastName = getFeminineLastName(lastNameBase);
+            }
+
+            nameOutputEl.textContent = `${lastName} ${firstName} ${patronymic}`;
+            nameOutputEl.classList.remove('placeholder');
+        }
+
+        generateBtnRu.addEventListener('click', generateName);
+
+
+        function applyLanguage(lang) {
+            htmlElement.setAttribute('lang', lang);
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (langData[lang] && langData[lang][key]) {
+                    if (el.id === 'generatedNameOutput' && !el.classList.contains('placeholder')) {
+                        // Don't overwrite generated name with placeholder text if already generated
+                    } else {
+                        el.textContent = langData[lang][key];
+                    }
+                }
+            });
+            themeSwitcher.setAttribute('title', langData[lang].theme_switch_title);
+            languageSwitcher.setAttribute('title', langData[lang].lang_switch_title);
+            if (backToMainBtn) backToMainBtn.setAttribute('title', langData[lang].back_to_main_title);
+        }
+
+        languageSwitcher.addEventListener('click', () => {
+            currentLang = currentLang === 'ru' ? 'en' : 'ru';
+            localStorage.setItem('preferredLang', currentLang);
+            applyLanguage(currentLang);
+        });
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                htmlElement.classList.add('dark-theme');
+                themeSwitcher.textContent = '☀️';
+            } else {
+                htmlElement.classList.remove('dark-theme');
+                themeSwitcher.textContent = '🌙';
+            }
+        }
+
+        themeSwitcher.addEventListener('click', () => {
+            currentTheme = htmlElement.classList.contains('dark-theme') ? 'light' : 'dark';
+            localStorage.setItem('preferredTheme', currentTheme);
+            applyTheme(currentTheme);
+        });
+
+        // Initial Load
+        applyTheme(currentTheme);
+        applyLanguage(currentLang);
+
+    </script>
+</body>
+</html>

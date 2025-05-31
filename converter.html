@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="page_title_case_converter">Конвертер Регистра</title>
+    <style>
+        :root {
+            /* Light Theme (from code (6).html) */
+            --bg-color: #f4f7f9;
+            --primary-color: #ffffff;
+            --secondary-color: #e9eff3;
+            --accent-color: #007bff;
+            --accent-hover-color: #0056b3;
+            --text-color: #333333;
+            --text-light-color: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --success-color: #28a745;
+            --success-hover-color: #1e7e34;
+        }
+
+        html.dark-theme {
+            /* Dark Theme (from code (6).html) */
+            --bg-color: #1e1e2f;
+            --primary-color: #2c2c44;
+            --secondary-color: #3b3b58;
+            --accent-color: #89b4fa;
+            --accent-hover-color: #6c95c7;
+            --text-color: #cdd6f4;
+            --text-light-color: #11111b;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --success-color: #a6e3a1;
+            --success-hover-color: #81c784;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color);
+            line-height: 1.6; display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding: 20px; padding-top: 80px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .top-controls {
+            position: fixed; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 1000;
+        }
+        .top-controls .control-btn {
+            background-color: var(--primary-color); color: var(--accent-color);
+            border: 1px solid var(--secondary-color); width: 45px; height: 45px;
+            border-radius: var(--border-radius); cursor: pointer; font-size: 1.6em;
+            display: flex; align-items: center; justify-content: center; text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+        .top-controls .control-btn:hover {
+            background-color: var(--secondary-color); transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+        .top-controls .control-btn:active { transform: translateY(0px); box-shadow: 0 2px 5px var(--shadow-color); }
+
+        header { text-align: center; margin-bottom: 20px; }
+        header h1 { font-size: 2.2em; color: var(--accent-color); transition: color 0.3s ease; }
+
+        .tool-container {
+            background-color: var(--primary-color); padding: 25px; border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px var(--shadow-color); width: 100%; max-width: 700px; /* Slightly narrower */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .textarea-container {
+            margin-bottom: 20px;
+            position: relative; /* For copy button positioning */
+        }
+        .textarea-container label {
+            display: block; margin-bottom: 8px; font-weight: bold; color: var(--text-color);
+        }
+        textarea {
+            width: 100%; min-height: 150px; padding: 15px;
+            border: 1px solid var(--secondary-color); border-radius: var(--border-radius);
+            background-color: var(--bg-color); color: var(--text-color); font-size: 1em;
+            font-family: var(--font-family); resize: vertical;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        #outputCaseText {
+            padding-bottom: 45px; /* Space for copy button */
+        }
+        textarea:focus {
+            outline: none; border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 30%, transparent);
+        }
+        textarea[readonly] {
+            background-color: color-mix(in srgb, var(--bg-color) 80%, var(--secondary-color));
+            cursor: default;
+        }
+
+        .copy-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: var(--secondary-color);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            opacity: 0.8;
+        }
+        .copy-button:hover {
+            background-color: var(--accent-color);
+            color: var(--text-light-color);
+            opacity: 1;
+        }
+        .copy-button.copied {
+            background-color: var(--success-color);
+            color: var(--text-light-color);
+            border-color: var(--success-color);
+        }
+
+        .action-buttons-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Responsive grid */
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .action-buttons-group button {
+            background-color: var(--accent-color);
+            color: var(--text-light-color);
+            border: none;
+            padding: 12px 15px;
+            font-size: 0.95em;
+            font-weight: bold;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+        .action-buttons-group button:hover {
+            background-color: var(--accent-hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+        .action-buttons-group button:active {
+            transform: translateY(0px);
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            body { padding-top: 70px; padding-left:10px; padding-right:10px; }
+            .top-controls { top:10px; right:10px; gap: 8px; }
+            .top-controls .control-btn { width: 40px; height: 40px; font-size: 1.4em; }
+            header h1 { font-size: 1.8em; }
+            .tool-container { padding: 15px; }
+            textarea { min-height: 120px; }
+            #outputCaseText { padding-bottom: 40px; }
+            .copy-button { font-size: 0.8em; padding: 5px 10px; }
+            .action-buttons-group { grid-template-columns: 1fr; } /* Stack buttons on very small screens */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-controls">
+        <a href="index.html" id="back-to-main" class="control-btn" title="На главную">⬅️</a>
+        <button id="theme-switcher" class="control-btn" title="Переключить тему">🌙</button>
+        <button id="language-switcher" class="control-btn" title="Сменить язык">🌍</button>
+    </div>
+
+    <header>
+        <h1 data-lang-key="tool_title_case_converter">Конвертер Регистра</h1>
+    </header>
+
+    <main class="tool-container">
+        <div class="textarea-container">
+            <label for="inputCaseText" data-lang-key="label_input_text">Исходный текст:</label>
+            <textarea id="inputCaseText" rows="8" data-lang-placeholder-key="placeholder_input_case_converter" placeholder="Введите текст для конвертации..."></textarea>
+        </div>
+
+        <div class="textarea-container">
+            <label for="outputCaseText" data-lang-key="label_output_text">Результат:</label>
+            <textarea id="outputCaseText" rows="8" readonly data-lang-placeholder-key="placeholder_output_case_converter" placeholder="Преобразованный текст появится здесь..."></textarea>
+            <button class="copy-button" id="copyOutputBtn" data-lang-key="copy_btn">Копировать</button>
+        </div>
+
+        <div class="action-buttons-group">
+            <button data-action="sentence" data-lang-key="btn_sentence_case">В начало предложений</button>
+            <button data-action="upper" data-lang-key="btn_uppercase">ВСЕ ЗАГЛАВНЫЕ</button>
+            <button data-action="lower" data-lang-key="btn_lowercase">все строчные</button>
+            <button data-action="alternating" data-lang-key="btn_alternating_case">ЧеРеДуЮщИйСя</button>
+            <button data-action="random" data-lang-key="btn_random_case">СлУчАйНыЙ</button>
+            <button data-action="inverse" data-lang-key="btn_inverse_case">иНВЕРТИРОВАННЫЙ</button>
+        </div>
+    </main>
+
+    <script>
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const languageSwitcher = document.getElementById('language-switcher');
+        const backToMainBtn = document.getElementById('back-to-main');
+        const htmlElement = document.documentElement;
+
+        const inputTextArea = document.getElementById('inputCaseText');
+        const outputTextArea = document.getElementById('outputCaseText');
+        const copyOutputBtn = document.getElementById('copyOutputBtn');
+        const actionButtonsGroup = document.querySelector('.action-buttons-group');
+
+        const langData = {
+            ru: {
+                page_title_case_converter: "Конвертер Регистра",
+                tool_title_case_converter: "Конвертер Регистра",
+                label_input_text: "Исходный текст:",
+                placeholder_input_case_converter: "Введите текст для конвертации...",
+                label_output_text: "Результат:",
+                placeholder_output_case_converter: "Преобразованный текст появится здесь...",
+                copy_btn: "Копировать",
+                copied_btn: "Скопировано!",
+                btn_sentence_case: "В начало предложений",
+                btn_uppercase: "ВСЕ ЗАГЛАВНЫЕ",
+                btn_lowercase: "все строчные",
+                btn_alternating_case: "ЧеРеДуЮщИйСя",
+                btn_random_case: "СлУчАйНыЙ",
+                btn_inverse_case: "иНВЕРТИРОВАННЫЙ",
+                theme_switch_title: "Переключить тему",
+                lang_switch_title: "Сменить язык",
+                back_to_main_title: "На главную"
+            },
+            en: {
+                page_title_case_converter: "Case Converter",
+                tool_title_case_converter: "Case Converter",
+                label_input_text: "Input Text:",
+                placeholder_input_case_converter: "Enter text to convert...",
+                label_output_text: "Result:",
+                placeholder_output_case_converter: "Converted text will appear here...",
+                copy_btn: "Copy",
+                copied_btn: "Copied!",
+                btn_sentence_case: "Sentence case",
+                btn_uppercase: "UPPERCASE",
+                btn_lowercase: "lowercase",
+                btn_alternating_case: "AlTeRnAtInG CaSe",
+                btn_random_case: "RaNdOm CaSe",
+                btn_inverse_case: "InVeRsE CaSe",
+                theme_switch_title: "Switch Theme",
+                lang_switch_title: "Switch Language",
+                back_to_main_title: "Back to Main"
+            }
+        };
+
+        let currentLang = localStorage.getItem('preferredLang') || 'ru';
+        let currentTheme = localStorage.getItem('preferredTheme') || 'light';
+
+        function convertCase(action, text) {
+            switch (action) {
+                case 'sentence':
+                    // Basic sentence case: Lowercase all, then uppercase first letter and after . ! ? followed by space.
+                    let lowerText = text.toLowerCase();
+                    return lowerText.replace(/(^\s*\w|[.!?]\s+\w)/g, function(c) {
+                        return c.toUpperCase();
+                    });
+                case 'upper':
+                    return text.toUpperCase();
+                case 'lower':
+                    return text.toLowerCase();
+                case 'alternating':
+                    let resultAlt = '';
+                    let toUpper = true;
+                    for (let i = 0; i < text.length; i++) {
+                        const char = text[i];
+                        if (char.match(/[a-zA-Zа-яА-ЯёЁ]/)) { // Only alternate letters
+                            resultAlt += toUpper ? char.toUpperCase() : char.toLowerCase();
+                            toUpper = !toUpper;
+                        } else {
+                            resultAlt += char; // Preserve non-letters
+                        }
+                    }
+                    return resultAlt;
+                case 'random':
+                    let resultRnd = '';
+                    for (let i = 0; i < text.length; i++) {
+                        const char = text[i];
+                        if (char.match(/[a-zA-Zа-яА-ЯёЁ]/)) {
+                             resultRnd += Math.random() > 0.5 ? char.toUpperCase() : char.toLowerCase();
+                        } else {
+                            resultRnd += char;
+                        }
+                    }
+                    return resultRnd;
+                case 'inverse':
+                    let resultInv = '';
+                    for (let i = 0; i < text.length; i++) {
+                        const char = text[i];
+                        if (char === char.toUpperCase()) {
+                            resultInv += char.toLowerCase();
+                        } else if (char === char.toLowerCase()) {
+                            resultInv += char.toUpperCase();
+                        } else {
+                            resultInv += char;
+                        }
+                    }
+                    return resultInv;
+                default:
+                    return text;
+            }
+        }
+
+        actionButtonsGroup.addEventListener('click', (event) => {
+            if (event.target.tagName === 'BUTTON' && event.target.dataset.action) {
+                const action = event.target.dataset.action;
+                const inputText = inputTextArea.value;
+                outputTextArea.value = convertCase(action, inputText);
+                // Reset copy button state
+                copyOutputBtn.textContent = langData[currentLang].copy_btn;
+                copyOutputBtn.classList.remove('copied');
+            }
+        });
+
+        copyOutputBtn.addEventListener('click', () => {
+            if (outputTextArea.value) {
+                navigator.clipboard.writeText(outputTextArea.value).then(() => {
+                    copyOutputBtn.textContent = langData[currentLang].copied_btn;
+                    copyOutputBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyOutputBtn.textContent = langData[currentLang].copy_btn;
+                        copyOutputBtn.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    alert(currentLang === 'ru' ? 'Не удалось скопировать текст.' : 'Failed to copy text.');
+                });
+            }
+        });
+
+        function applyLanguage(lang) {
+            htmlElement.setAttribute('lang', lang);
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (langData[lang] && langData[lang][key]) {
+                    if (el.tagName === 'TEXTAREA' && el.hasAttribute('data-lang-placeholder-key')) {
+                        // Handled by placeholder specific logic below
+                    } else if (el.id === 'copyOutputBtn' && !el.classList.contains('copied')) {
+                        el.textContent = langData[lang][key];
+                    } else if (el.id !== 'copyOutputBtn') {
+                        el.textContent = langData[lang][key];
+                    }
+                }
+            });
+            document.querySelectorAll('textarea[data-lang-placeholder-key]').forEach(el => {
+                const key = el.dataset.langPlaceholderKey;
+                if (langData[lang] && langData[lang][key]) {
+                    el.setAttribute('placeholder', langData[lang][key]);
+                }
+            });
+            themeSwitcher.setAttribute('title', langData[lang].theme_switch_title);
+            languageSwitcher.setAttribute('title', langData[lang].lang_switch_title);
+            if (backToMainBtn) backToMainBtn.setAttribute('title', langData[lang].back_to_main_title);
+
+            if (!copyOutputBtn.classList.contains('copied')) {
+                copyOutputBtn.textContent = langData[lang].copy_btn;
+            } else {
+                 copyOutputBtn.textContent = langData[lang].copied_btn;
+            }
+        }
+
+        languageSwitcher.addEventListener('click', () => {
+            currentLang = currentLang === 'ru' ? 'en' : 'ru';
+            localStorage.setItem('preferredLang', currentLang);
+            applyLanguage(currentLang);
+        });
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                htmlElement.classList.add('dark-theme');
+                themeSwitcher.textContent = '☀️';
+            } else {
+                htmlElement.classList.remove('dark-theme');
+                themeSwitcher.textContent = '🌙';
+            }
+        }
+
+        themeSwitcher.addEventListener('click', () => {
+            currentTheme = htmlElement.classList.contains('dark-theme') ? 'light' : 'dark';
+            localStorage.setItem('preferredTheme', currentTheme);
+            applyTheme(currentTheme);
+        });
+
+        // Initial Load
+        applyTheme(currentTheme);
+        applyLanguage(currentLang);
+
+    </script>
+</body>
+</html>
