@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="page_title_quality">Анализ Качества Текста</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f9; --primary-color: #ffffff; --secondary-color: #e9eff3;
+            --accent-color: #007bff; --accent-hover-color: #0056b3; --text-color: #333333;
+            --text-light-color: #ffffff; --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-radius: 8px; --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --error-color: #dc3545; --warning-color: #ffc107;
+        }
+        html.dark-theme {
+            --bg-color: #1e1e2f; --primary-color: #2c2c44; --secondary-color: #3b3b58;
+            --accent-color: #89b4fa; --accent-hover-color: #6c95c7; --text-color: #cdd6f4;
+            --text-light-color: #11111b; --shadow-color: rgba(0, 0, 0, 0.3);
+            --error-color: #f38ba8; --warning-color: #f9e2af;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color);
+            line-height: 1.6; display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding: 20px; padding-top: 80px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .top-controls {
+            position: fixed; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 1000;
+        }
+        .top-controls .control-btn {
+            background-color: var(--primary-color); color: var(--accent-color);
+            border: 1px solid var(--secondary-color); width: 45px; height: 45px;
+            border-radius: var(--border-radius); cursor: pointer; font-size: 1.6em;
+            display: flex; align-items: center; justify-content: center; text-decoration: none;
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+        .top-controls .control-btn:hover {
+            background-color: var(--secondary-color); transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+        .top-controls .control-btn:active { transform: translateY(0px); box-shadow: 0 2px 5px var(--shadow-color); }
+
+        header { text-align: center; margin-bottom: 20px; }
+        header h1 { font-size: 2.2em; color: var(--accent-color); transition: color 0.3s ease; }
+
+        .tool-container {
+            background-color: var(--primary-color); padding: 25px; border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px var(--shadow-color); width: 100%; max-width: 800px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        #textQualityInput {
+            width: 100%; min-height: 150px; padding: 15px; margin-bottom: 20px;
+            border: 1px solid var(--secondary-color); border-radius: var(--border-radius);
+            background-color: var(--bg-color); color: var(--text-color); font-size: 1em;
+            font-family: var(--font-family); resize: vertical;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        #textQualityInput:focus {
+            outline: none; border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 30%, transparent);
+        }
+        .analyze-button-container { text-align: center; margin-bottom: 25px; }
+        #analyzeTextBtn {
+            background-color: var(--accent-color); color: var(--text-light-color);
+            border: none; padding: 12px 25px; border-radius: var(--border-radius);
+            font-size: 1.1em; font-weight: bold; cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        #analyzeTextBtn:hover { background-color: var(--accent-hover-color); }
+        #analyzeTextBtn:active { transform: scale(0.98); }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Default to single column */
+            gap: 20px;
+        }
+        @media (min-width: 768px) {
+            .results-grid { grid-template-columns: repeat(2, 1fr); } /* Two columns on wider screens */
+        }
+
+        .results-section {
+            background-color: color-mix(in srgb, var(--primary-color) 95%, var(--bg-color));
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--secondary-color);
+        }
+        .results-section summary {
+            font-weight: bold; font-size: 1.2em; color: var(--accent-color);
+            cursor: pointer; padding-bottom: 8px; margin-bottom: 10px;
+            border-bottom: 1px solid var(--secondary-color);
+            list-style: none; /* Remove default marker */
+            position: relative;
+            padding-left: 20px; /* Space for the custom marker */
+        }
+        .results-section summary::-webkit-details-marker { display: none; } /* Chrome/Safari */
+        .results-section summary::before { /* Custom marker */
+            content: '▶';
+            position: absolute;
+            left: 0px; /* Positioned at the very left of the padding area */
+            top: 50%;
+            transform: translateY(-50%) rotate(0deg);
+            transition: transform 0.2s ease-in-out;
+            font-size: 1em; /* Increased size */
+            color: var(--accent-color);
+            line-height: 1; /* Ensure it aligns well vertically */
+        }
+        .results-section[open] summary::before { transform: translateY(-50%) rotate(90deg); }
+
+        .results-section p, .results-section li { margin-bottom: 8px; font-size: 0.95em; }
+        .results-section strong { color: var(--accent-color); }
+        .results-section .value { font-weight: bold; }
+        .results-section ul { padding-left: 20px; }
+        .results-section .interpretation { font-style: italic; font-size: 0.9em; margin-top: 5px; }
+        .syllable-note { font-size: 0.8em; color: var(--text-color); opacity: 0.7; margin-top:10px; }
+
+        .highlight { background-color: color-mix(in srgb, var(--warning-color) 20%, transparent); padding: 2px 4px; border-radius: 3px;}
+
+        /* Specific styling for tempoAndRhythmSection to span columns */
+        @media (min-width: 768px) {
+            .results-grid #tempoAndRhythmSection {
+                grid-column: 1 / -1; /* Span across all columns */
+            }
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            body { padding-top: 70px; padding-left:10px; padding-right:10px; }
+            .top-controls { top:10px; right:10px; gap: 8px; }
+            .top-controls .control-btn { width: 40px; height: 40px; font-size: 1.4em; }
+            header h1 { font-size: 1.8em; }
+            .tool-container { padding: 15px; }
+            .results-section summary { font-size: 1.1em; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-controls">
+        <a href="index.html" id="back-to-main" class="control-btn" title="На главную">⬅️</a>
+        <button id="theme-switcher" class="control-btn" title="Переключить тему">🌙</button>
+        <button id="language-switcher" class="control-btn" title="Сменить язык">🌍</button>
+    </div>
+
+    <header>
+        <h1 data-lang-key="tool_title_quality">Анализ Качества Текста</h1>
+    </header>
+
+    <main class="tool-container">
+        <textarea id="textQualityInput" rows="12" data-lang-placeholder-key="textarea_placeholder_quality" placeholder="Введите или вставьте ваш текст для анализа..."></textarea>
+        <div class="analyze-button-container">
+            <button id="analyzeTextBtn" data-lang-key="analyze_btn">Анализировать</button>
+        </div>
+
+        <div id="resultsDisplay" class="results-grid" style="display: none;">
+            <details class="results-section" id="readabilitySection" open>
+                <summary data-lang-key="section_readability">Удобочитаемость (Формулы Флеша)</summary>
+                <p><span data-lang-key="flesch_reading_ease">Flesch Reading Ease</span>: <strong id="fleschEaseScore" class="value">N/A</strong></p>
+                <p class="interpretation" id="fleschEaseDesc">---</p>
+                <p><span data-lang-key="flesch_kincaid_grade">Flesch-Kincaid Grade Level</span>: <strong id="fleschKincaidGrade" class="value">N/A</strong></p>
+                <p class="interpretation" id="fleschKincaidDesc">---</p>
+                <p class="syllable-note" data-lang-key="syllable_note">Примечание: Подсчет слогов является приблизительным, особенно для неанглийских текстов.</p>
+            </details>
+
+            <details class="results-section" id="sentenceStatsSection">
+                <summary data-lang-key="section_sentence_stats">Статистика предложений</summary>
+                <p><span data-lang-key="total_sentences">Всего предложений</span>: <strong id="totalSentences" class="value">0</strong></p>
+                <p><span data-lang-key="shortest_sentence">Самое короткое предложение (слов)</span>: <strong id="shortestSentence" class="value">N/A</strong></p>
+                <p><span data-lang-key="longest_sentence">Самое длинное предложение (слов)</span>: <strong id="longestSentence" class="value">N/A</strong></p>
+            </details>
+
+            <details class="results-section" id="paragraphStatsSection">
+                <summary data-lang-key="section_paragraph_stats">Статистика абзацев</summary>
+                <p><span data-lang-key="total_paragraphs">Всего абзацев</span>: <strong id="totalParagraphs" class="value">0</strong></p>
+                <p><span data-lang-key="median_paragraph_length">Медианная длина абзаца (слов)</span>: <strong id="medianParagraphLength" class="value">N/A</strong></p>
+            </details>
+
+            <details class="results-section" id="wordAnalysisSection">
+                <summary data-lang-key="section_word_analysis">Анализ слов</summary>
+                <p><span data-lang-key="total_words">Всего слов</span>: <strong id="totalWords" class="value">0</strong></p>
+                <p><span data-lang-key="total_syllables">Всего слогов (прибл.)</span>: <strong id="totalSyllables" class="value">0</strong></p>
+                <p><span data-lang-key="avg_syllables_word">Среднее кол-во слогов на слово</span>: <strong id="avgSyllablesPerWord" class="value">N/A</strong></p>
+                <p><span data-lang-key="avg_words_sentence">Среднее кол-во слов на предложение</span>: <strong id="avgWordsPerSentence" class="value">N/A</strong></p>
+                <p><span data-lang-key="pronoun_percentage">Процент местоимений</span>: <strong id="pronounPercentage" class="value">N/A</strong></p>
+                <h4 data-lang-key="common_words_title" style="margin-top:15px; margin-bottom:5px; font-size: 1em;">Топ-10 частых слов (без стоп-слов):</h4>
+                <ul id="commonWordsList"></ul>
+            </details>
+
+            <details class="results-section" id="tempoAndRhythmSection"> <!-- ID Changed -->
+                <summary data-lang-key="section_tempo_rhythm">Темп и Ритм</summary> <!-- Key Changed -->
+                <div id="consecutiveSentencesResults">
+                    <p data-lang-key="no_consecutive_found">Последовательности не найдены.</p>
+                </div>
+            </details>
+        </div>
+    </main>
+
+    <script>
+        // --- DOM Elements ---
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const languageSwitcher = document.getElementById('language-switcher');
+        const backToMainBtn = document.getElementById('back-to-main');
+        const htmlElement = document.documentElement;
+        const textInput = document.getElementById('textQualityInput');
+        const analyzeBtn = document.getElementById('analyzeTextBtn');
+        const resultsDisplay = document.getElementById('resultsDisplay');
+
+        // Result fields
+        const fleschEaseScoreEl = document.getElementById('fleschEaseScore');
+        const fleschEaseDescEl = document.getElementById('fleschEaseDesc');
+        const fleschKincaidGradeEl = document.getElementById('fleschKincaidGrade');
+        const fleschKincaidDescEl = document.getElementById('fleschKincaidDesc');
+        const totalSentencesEl = document.getElementById('totalSentences');
+        const shortestSentenceEl = document.getElementById('shortestSentence');
+        const longestSentenceEl = document.getElementById('longestSentence');
+        const totalParagraphsEl = document.getElementById('totalParagraphs');
+        const medianParagraphLengthEl = document.getElementById('medianParagraphLength');
+        const totalWordsEl = document.getElementById('totalWords');
+        const totalSyllablesEl = document.getElementById('totalSyllables');
+        const avgSyllablesPerWordEl = document.getElementById('avgSyllablesPerWord');
+        const avgWordsPerSentenceEl = document.getElementById('avgWordsPerSentence');
+        const pronounPercentageEl = document.getElementById('pronounPercentage');
+        const commonWordsListEl = document.getElementById('commonWordsList');
+        const consecutiveSentencesResultsEl = document.getElementById('consecutiveSentencesResults');
+
+        // --- Language Data & Config ---
+        const langData = {
+            ru: {
+                page_title_quality: "Анализ Качества Текста",
+                tool_title_quality: "Анализ Качества Текста",
+                textarea_placeholder_quality: "Введите или вставьте ваш текст для анализа...",
+                analyze_btn: "Анализировать",
+                section_readability: "Удобочитаемость (Формулы Флеша)",
+                flesch_reading_ease: "Индекс удобочитаемости Флеша",
+                flesch_kincaid_grade: "Уровень образования Флеша-Кинкейда",
+                syllable_note: "Примечание: Подсчет слогов является приблизительным, особенно для неанглийских текстов.",
+                section_sentence_stats: "Статистика предложений",
+                total_sentences: "Всего предложений",
+                shortest_sentence: "Самое короткое предложение (слов)",
+                longest_sentence: "Самое длинное предложение (слов)",
+                section_paragraph_stats: "Статистика абзацев",
+                total_paragraphs: "Всего абзацев",
+                median_paragraph_length: "Медианная длина абзаца (слов)",
+                section_word_analysis: "Анализ слов",
+                total_words: "Всего слов",
+                total_syllables: "Всего слогов (прибл.)",
+                avg_syllables_word: "Среднее кол-во слогов на слово",
+                avg_words_sentence: "Среднее кол-во слов на предложение",
+                pronoun_percentage: "Процент местоимений",
+                common_words_title: "Топ-10 частых слов (без стоп-слов):",
+                section_tempo_rhythm: "Темп и Ритм", // Changed Key
+                no_consecutive_found: "Последовательности не найдены.",
+                consecutive_sequence_intro: (count, length) => `Найдена последовательность из ${count} предл. длиной ${length} слов:`,
+                theme_switch_title: "Переключить тему",
+                lang_switch_title: "Сменить язык",
+                back_to_main_title: "На главную",
+                flesch_interpretations_ru: {
+                    fre_very_easy: "Очень легко читать. Легко понимается 5-классником.",
+                    fre_easy: "Легко читать. Разговорный английский для потребителей.",
+                    fre_fairly_easy: "Довольно легко читать.",
+                    fre_standard: "Стандартный. Легко понимается учениками 8-9 классов.",
+                    fre_fairly_difficult: "Довольно сложно читать.",
+                    fre_difficult: "Сложно читать.",
+                    fre_very_difficult: "Очень сложно читать. Лучше всего понимается выпускниками вузов.",
+                    fk_grade_levels: (grade) => `Уровень ${grade} класса`,
+                    fk_college: "Студент колледжа",
+                    fk_college_grad: "Выпускник вуза"
+                }
+            },
+            en: {
+                page_title_quality: "Text Quality Analysis",
+                tool_title_quality: "Text Quality Analysis",
+                textarea_placeholder_quality: "Enter or paste your text for analysis...",
+                analyze_btn: "Analyze",
+                section_readability: "Readability (Flesch Formulas)",
+                flesch_reading_ease: "Flesch Reading Ease",
+                flesch_kincaid_grade: "Flesch-Kincaid Grade Level",
+                syllable_note: "Note: Syllable counting is an approximation, especially for non-English texts.",
+                section_sentence_stats: "Sentence Statistics",
+                total_sentences: "Total Sentences",
+                shortest_sentence: "Shortest Sentence (words)",
+                longest_sentence: "Longest Sentence (words)",
+                section_paragraph_stats: "Paragraph Statistics",
+                total_paragraphs: "Total Paragraphs",
+                median_paragraph_length: "Median Paragraph Length (words)",
+                section_word_analysis: "Word Analysis",
+                total_words: "Total Words",
+                total_syllables: "Total Syllables (approx.)",
+                avg_syllables_word: "Avg. Syllables per Word",
+                avg_words_sentence: "Avg. Words per Sentence",
+                pronoun_percentage: "Pronoun Percentage",
+                common_words_title: "Top 10 Common Words (excluding stop words):",
+                section_tempo_rhythm: "Tempo and Rhythm", // Changed Key
+                no_consecutive_found: "No consecutive sequences found.",
+                consecutive_sequence_intro: (count, length) => `Found a sequence of ${count} sentences with length ${length} words:`,
+                theme_switch_title: "Switch Theme",
+                lang_switch_title: "Switch Language",
+                back_to_main_title: "Back to Main",
+                flesch_interpretations_en: {
+                    fre_very_easy: "Very easy to read. Easily understood by an average 5th grader.",
+                    fre_easy: "Easy to read. Conversational English for consumers.",
+                    fre_fairly_easy: "Fairly easy to read.",
+                    fre_standard: "Plain English. Easily understood by 8th and 9th graders.",
+                    fre_fairly_difficult: "Fairly difficult to read.",
+                    fre_difficult: "Difficult to read.",
+                    fre_very_difficult: "Very difficult to read. Best understood by university graduates.",
+                    fk_grade_levels: (grade) => `Grade ${grade} Level`,
+                    fk_college: "College Student",
+                    fk_college_grad: "College Graduate"
+                }
+            }
+        };
+        // ... (rest of the stopWords, pronouns, and JavaScript functions remain the same as before) ...
+        // Syllable counting, text parsing, Flesch calculations etc. are unchanged.
+
+        const stopWords = {
+            en: new Set(['a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should', 'can', 'could', 'may', 'might', 'must', 'and', 'but', 'or', 'nor', 'for', 'so', 'yet', 'in', 'on', 'at', 'by', 'from', 'to', 'with', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'as', 'because', 'before', 'below', 'between', 'both', ' Mror', ' Ms', ' Mrs', ' Miss', ' Dr', ' Prof', 'etc', 'eg', 'ie', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'its', 'our', 'their', 'mine', 'yours', 'hers', 'ours', 'theirs', 'myself', 'yourself', 'himself', 'herself', 'itself', 'ourselves', 'yourselves', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'here', 'there', 'when', 'where', 'why', 'how', 'of', 'if', 'not', 'no', 'just', 'very', 's', 't', 'o', 'd', 'll', 'm', 're', 've', 'y', 'ain', 'aren', 'couldn', 'didn', 'doesn', 'hadn', 'hasn', 'haven', 'isn', 'ma', 'mightn', 'mustn', 'needn', 'shan', 'shouldn', 'wasn', 'weren', 'won', 'wouldn']),
+            ru: new Set(['и', 'в', 'во', 'не', 'что', 'он', 'на', 'я', 'с', 'со', 'как', 'а', 'то', 'все', 'она', 'так', 'его', 'но', 'да', 'ты', 'к', 'у', 'же', 'вы', 'за', 'бы', 'по', 'только', 'ее', 'мне', 'было', 'вот', 'от', 'меня', 'еще', 'нет', 'о', 'из', 'ему', 'теперь', 'когда', 'даже', 'ну', 'вдруг', 'ли', 'если', 'уже', 'или', 'ни', 'быть', 'был', 'него', 'до', 'вас', 'нибудь', 'опять', 'уж', 'вам', 'ведь', 'там', 'потом', 'себя', 'ничего', 'ей', 'может', 'они', 'тут', 'где', 'есть', 'надо', 'ней', 'для', 'мы', 'тебя', 'их', 'чем', 'была', 'сам', 'чтоб', 'без', 'будто', 'чего', 'раз', 'тоже', 'себе', 'под', 'будет', 'ж', 'тогда', 'кто', 'этот', 'того', 'потому', 'этого', 'какой', 'совсем', 'ним', 'здесь', 'этом', 'один', 'почти', 'мой', 'тем', 'чтобы', 'нее', 'сейчас', 'были', 'куда', 'зачем', 'всех', 'никогда', 'можно', 'при', 'наконец', 'два', 'об', 'другой', 'хоть', 'после', 'над', 'больше', 'тот', 'через', 'эти', 'нас', 'про', 'всего', 'них', 'какая', 'много', 'разве', 'три', 'эту', 'моя', 'впрочем', 'хорошо', 'свою', 'этой', 'перед', 'иногда', 'лучше', 'чуть', 'том', 'нельзя', 'такой', 'им', 'более', 'всегда', 'конечно', 'всю', 'между'])
+        };
+        const pronouns = {
+            en: new Set(['i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'myself', 'yourself', 'himself', 'herself', 'itself', 'ourselves', 'yourselves', 'themselves', 'my', 'your', 'his', 'its', 'our', 'their', 'mine', 'yours', 'hers', 'ours', 'theirs', 'who', 'whom', 'whose', 'which', 'that', 'this', 'these', 'those', 'what']),
+            ru: new Set(['я', 'ты', 'он', 'она', 'оно', 'мы', 'вы', 'они', 'меня', 'тебя', 'его', 'её', 'нас', 'вас', 'их', 'мне', 'тебе', 'ему', 'ей', 'нам', 'вам', 'им', 'мной', 'тобой', 'им', 'ей', 'ею', 'нами', 'вами', 'ими', 'мой', 'твой', 'свой', 'наш', 'ваш', 'его', 'её', 'их', 'кто', 'что', 'какой', 'каков', 'чей', 'который', 'сколько', 'этот', 'тот', 'такой', 'таков', 'сей', 'столько', 'сам', 'самый', 'весь', 'всякий', 'каждый', 'любой', 'другой', 'иной', 'никто', 'ничто', 'никакой', 'ничей', 'некого', 'нечего', 'себя'])
+        };
+
+        let currentLang = localStorage.getItem('preferredLang') || 'ru';
+        let currentTheme = localStorage.getItem('preferredTheme') || 'light';
+
+        // --- Core Logic ---
+        function countSyllables(word, lang) {
+            word = word.toLowerCase().trim();
+            if (!word) return 0;
+            if (/^[0-9.,!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`§±\d]+$/.test(word) || word.length <= 2 && !(/[аеёиоуыэюяaeiouy]/i.test(word))) {
+                return 1;
+            }
+            if (lang === 'ru') {
+                const vowels = 'аеёиоуыэюя';
+                let syllableCount = 0; let inVowelGroup = false;
+                for (let char of word) {
+                    if (vowels.includes(char)) {
+                        if (!inVowelGroup) { syllableCount++; inVowelGroup = true; }
+                    } else { inVowelGroup = false; }
+                }
+                return Math.max(1, syllableCount);
+            } else {
+                if (word.length <= 3 && /[aeiouy]/.test(word)) return 1;
+                word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+                word = word.replace(/^y/, '');
+                const vowelMatches = word.match(/[aeiouy]{1,2}/g);
+                let count = vowelMatches ? vowelMatches.length : 0;
+                if (word.endsWith('le') && word.length > 2 && !/[aeiouy]/.test(word.charAt(word.length - 3))) {
+                    if(!/[aeiouy]/.test(word.substring(0, word.length-2))) count++;
+                }
+                return Math.max(1, count);
+            }
+        }
+        function getWords(text) {
+             return text.match(/([a-zA-Zа-яА-ЯёЁ]['’a-zA-Zа-яА-ЯёЁ-]*[a-zA-Zа-яА-ЯёЁ])|([\d.,]+[%$€£¥₽]?[@#]?)|([&])|([@#$%\^&*_+=\-\[\]{};':"\\|,.<>\/?~`§±]+)/g) || [];
+        }
+        function getSentences(text) {
+            const sentences = text.split(/(?<!\b(?:Mr|Mrs|Ms|Dr|Prof|St|Jr|Sr|Ltd|Inc|Co|vs|e\.g|i\.e|No)\.)[.?!—…](?=\s+[A-ZА-ЯЁ]|\s*$|$)/g);
+            return sentences.map(s => s.trim()).filter(s => s.length > 0);
+        }
+        function getParagraphs(text) {
+            return text.split(/\n\s*\n+/).map(p => p.trim()).filter(p => p.length > 0);
+        }
+
+        function analyzeText() {
+            const text = textInput.value;
+            if (!text.trim()) {
+                alert(currentLang === 'ru' ? 'Пожалуйста, введите текст для анализа.' : 'Please enter text to analyze.');
+                return;
+            }
+            const words = getWords(text); const sentences = getSentences(text); const paragraphs = getParagraphs(text);
+            const totalWordCount = words.length; const totalSentenceCount = sentences.length; const totalParagraphCount = paragraphs.length;
+
+            if (totalWordCount === 0 || totalSentenceCount === 0) {
+                alert(currentLang === 'ru' ? 'Недостаточно текста для анализа (нужны слова и предложения).' : 'Not enough text to analyze (words and sentences needed).');
+                resultsDisplay.style.display = 'none'; return;
+            }
+            let totalSyllableCount = 0; words.forEach(word => { totalSyllableCount += countSyllables(word, currentLang); });
+            const avgWordsPerSentence = totalWordCount / totalSentenceCount; const avgSyllablesPerWord = totalSyllableCount / totalWordCount;
+            const fre = 206.835 - (1.015 * avgWordsPerSentence) - (84.6 * avgSyllablesPerWord);
+            fleschEaseScoreEl.textContent = fre.toFixed(2); fleschEaseDescEl.textContent = getFleschEaseInterpretation(fre, currentLang);
+            const fkgl = (0.39 * avgWordsPerSentence) + (11.8 * avgSyllablesPerWord) - 15.59;
+            fleschKincaidGradeEl.textContent = fkgl.toFixed(1); fleschKincaidDescEl.textContent = getFleschKincaidInterpretation(fkgl, currentLang);
+            totalSentencesEl.textContent = totalSentenceCount; totalWordsEl.textContent = totalWordCount; totalSyllablesEl.textContent = totalSyllableCount;
+            avgSyllablesPerWordEl.textContent = avgSyllablesPerWord.toFixed(2); avgWordsPerSentenceEl.textContent = avgWordsPerSentence.toFixed(2);
+
+            let shortestLen = Infinity, longestLen = 0; const sentenceWordCounts = [];
+            sentences.forEach(sentence => {
+                const sWords = getWords(sentence).length; sentenceWordCounts.push(sWords);
+                if (sWords > 0) { if (sWords < shortestLen) shortestLen = sWords; if (sWords > longestLen) longestLen = sWords; }
+            });
+            shortestSentenceEl.textContent = shortestLen === Infinity ? 'N/A' : shortestLen; longestSentenceEl.textContent = longestLen === 0 ? 'N/A' : longestLen;
+            totalParagraphsEl.textContent = totalParagraphCount;
+            if (totalParagraphCount > 0) {
+                const paragraphWordCounts = paragraphs.map(p => getWords(p).length).sort((a, b) => a - b);
+                let medianParagraphLen; const mid = Math.floor(paragraphWordCounts.length / 2);
+                if (paragraphWordCounts.length % 2 === 0) medianParagraphLen = (paragraphWordCounts[mid - 1] + paragraphWordCounts[mid]) / 2;
+                else medianParagraphLen = paragraphWordCounts[mid];
+                medianParagraphLengthEl.textContent = medianParagraphLen.toFixed(1);
+            } else medianParagraphLengthEl.textContent = 'N/A';
+
+            const wordCounts = {}; const currentStopWords = stopWords[currentLang] || new Set();
+            words.forEach(word => {
+                const cleanWord = word.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"“”…«»—]/g,"").trim();
+                if (cleanWord && !currentStopWords.has(cleanWord) && cleanWord.length > 1) wordCounts[cleanWord] = (wordCounts[cleanWord] || 0) + 1;
+            });
+            const sortedCommonWords = Object.entries(wordCounts).sort(([,a],[,b]) => b-a).slice(0, 10);
+            commonWordsListEl.innerHTML = '';
+            if (sortedCommonWords.length > 0) sortedCommonWords.forEach(([word, count]) => {
+                const li = document.createElement('li'); li.innerHTML = `<span class="value">${word}</span> (${count})`; commonWordsListEl.appendChild(li);
+            }); else commonWordsListEl.innerHTML = `<li>${currentLang === 'ru' ? 'Нет значимых слов для отображения.' : 'No significant words to display.'}</li>`;
+
+            let pronounCount = 0; const currentPronouns = pronouns[currentLang] || new Set();
+            words.forEach(word => { if (currentPronouns.has(word.toLowerCase().trim())) pronounCount++; });
+            pronounPercentageEl.textContent = totalWordCount > 0 ? `${((pronounCount / totalWordCount) * 100).toFixed(1)}%` : 'N/A';
+
+            consecutiveSentencesResultsEl.innerHTML = ''; let foundConsecutive = false;
+            if (sentenceWordCounts.length >= 2) {
+                for (let i = 0; i < sentenceWordCounts.length -1; ) {
+                    let currentLength = sentenceWordCounts[i]; if (currentLength === 0) { i++; continue; }
+                    let count = 1; let j = i + 1;
+                    while (j < sentenceWordCounts.length && sentenceWordCounts[j] === currentLength) { count++; j++; }
+                    if (count > 1) {
+                        foundConsecutive = true; const p = document.createElement('p');
+                        p.innerHTML = `<strong>${langData[currentLang].consecutive_sequence_intro(count, currentLength)}</strong>`; consecutiveSentencesResultsEl.appendChild(p);
+                        const ul = document.createElement('ul');
+                        for (let k = i; k < i + count; k++) {
+                            const li = document.createElement('li');
+                            li.textContent = `"${sentences[k].substring(0, 50)}${sentences[k].length > 50 ? '...' : ''}"`; ul.appendChild(li);
+                        }
+                        consecutiveSentencesResultsEl.appendChild(ul);
+                    }
+                    i = j;
+                }
+            }
+             if (!foundConsecutive) consecutiveSentencesResultsEl.innerHTML = `<p>${langData[currentLang].no_consecutive_found}</p>`;
+            resultsDisplay.style.display = 'grid';
+        }
+
+        function getFleschEaseInterpretation(score, lang) {
+            const interpretations = langData[lang].flesch_interpretations_ru || langData.en.flesch_interpretations_en;
+            if (score >= 90) return interpretations.fre_very_easy; if (score >= 80) return interpretations.fre_easy;
+            if (score >= 70) return interpretations.fre_fairly_easy; if (score >= 60) return interpretations.fre_standard;
+            if (score >= 50) return interpretations.fre_fairly_difficult; if (score >= 30) return interpretations.fre_difficult;
+            return interpretations.fre_very_difficult;
+        }
+        function getFleschKincaidInterpretation(grade, lang) {
+            const interpretations = langData[lang].flesch_interpretations_ru || langData.en.flesch_interpretations_en;
+            if (grade >= 16) return interpretations.fk_college_grad; if (grade >= 13) return interpretations.fk_college;
+            if (grade >=0 && grade < 13) return interpretations.fk_grade_levels(Math.round(grade));
+            return interpretations.fk_grade_levels(Math.round(grade));
+        }
+        analyzeBtn.addEventListener('click', analyzeText);
+
+        function applyLanguage(lang) {
+            htmlElement.setAttribute('lang', lang);
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (langData[lang] && langData[lang][key]) {
+                    if (typeof langData[lang][key] === 'function') {/* Skip */}
+                    else if (el.tagName === 'TITLE' || el.tagName === 'H1' || el.tagName === 'SUMMARY' || el.tagName === 'BUTTON' || el.classList.contains('label') || el.classList.contains('syllable-note') || el.tagName === 'H4' || el.classList.contains('interpretation')) {
+                        el.textContent = langData[lang][key];
+                    }
+                }
+            });
+            const placeholderKey = textInput.dataset.langPlaceholderKey;
+            if (langData[lang] && langData[lang][placeholderKey]) textInput.setAttribute('placeholder', langData[lang][placeholderKey]);
+            themeSwitcher.setAttribute('title', langData[lang].theme_switch_title);
+            languageSwitcher.setAttribute('title', langData[lang].lang_switch_title);
+            if (backToMainBtn) backToMainBtn.setAttribute('title', langData[lang].back_to_main_title);
+            if (resultsDisplay.style.display !== 'none' && textInput.value.trim()) analyzeText();
+            else resetResults();
+        }
+        function resetResults() {
+            fleschEaseScoreEl.textContent = 'N/A'; fleschEaseDescEl.textContent = '---';
+            fleschKincaidGradeEl.textContent = 'N/A'; fleschKincaidDescEl.textContent = '---';
+            totalSentencesEl.textContent = '0'; shortestSentenceEl.textContent = 'N/A'; longestSentenceEl.textContent = 'N/A';
+            totalParagraphsEl.textContent = '0'; medianParagraphLengthEl.textContent = 'N/A';
+            totalWordsEl.textContent = '0'; totalSyllablesEl.textContent = '0';
+            avgSyllablesPerWordEl.textContent = 'N/A'; avgWordsPerSentenceEl.textContent = 'N/A';
+            pronounPercentageEl.textContent = 'N/A'; commonWordsListEl.innerHTML = '';
+            consecutiveSentencesResultsEl.innerHTML = `<p>${langData[currentLang].no_consecutive_found}</p>`;
+            resultsDisplay.style.display = 'none';
+        }
+        languageSwitcher.addEventListener('click', () => {
+            currentLang = currentLang === 'ru' ? 'en' : 'ru'; localStorage.setItem('preferredLang', currentLang); applyLanguage(currentLang);
+        });
+        function applyTheme(theme) {
+            if (theme === 'dark') htmlElement.classList.add('dark-theme');
+            else htmlElement.classList.remove('dark-theme');
+            themeSwitcher.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        themeSwitcher.addEventListener('click', () => {
+            currentTheme = htmlElement.classList.contains('dark-theme') ? 'light' : 'dark'; localStorage.setItem('preferredTheme', currentTheme); applyTheme(currentTheme);
+        });
+        applyTheme(currentTheme); applyLanguage(currentLang); resetResults();
+    </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ru"> <!-- Default language set to Russian -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="page_title_counter">Счётчик Текста</title>
+    <style>
+        :root {
+            /* Light Theme (Default) */
+            --bg-color: #f4f7f9;
+            --primary-color: #ffffff;
+            --secondary-color: #e9eff3;
+            --accent-color: #007bff;
+            --accent-hover-color: #0056b3;
+            --text-color: #333333;
+            --text-light-color: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html.dark-theme {
+            --bg-color: #1e1e2f;
+            --primary-color: #2c2c44;
+            --secondary-color: #3b3b58;
+            --accent-color: #89b4fa;
+            --accent-hover-color: #6c95c7;
+            --text-color: #cdd6f4;
+            --text-light-color: #11111b;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: 80px; /* Space for fixed top controls */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .top-controls {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        /* Combined style for all control buttons (button and a tags) */
+        .top-controls .control-btn {
+            background-color: var(--primary-color);
+            color: var(--accent-color); /* Icon color */
+            border: 1px solid var(--secondary-color);
+            width: 45px;
+            height: 45px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1.6em; /* For emojis */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none; /* Important for <a> tags */
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        .top-controls .control-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+         .top-controls .control-btn:active {
+            transform: translateY(0px);
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            color: var(--accent-color);
+            transition: color 0.3s ease;
+        }
+
+        .tool-container {
+            background-color: var(--primary-color);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px var(--shadow-color);
+            width: 100%;
+            max-width: 700px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #textInput {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            margin-bottom: 25px;
+            border: 1px solid var(--secondary-color);
+            border-radius: var(--border-radius);
+            background-color: var(--bg-color); /* Matches body background */
+            color: var(--text-color);
+            font-size: 1em;
+            font-family: var(--font-family);
+            resize: vertical;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        #textInput:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 30%, transparent);
+        }
+
+        .results-area h2 {
+            font-size: 1.5em;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--secondary-color);
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .results-area p {
+            margin-bottom: 12px;
+            font-size: 1.05em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+        }
+        .results-area p:not(:last-child) {
+            border-bottom: 1px dashed var(--secondary-color);
+             transition: border-color 0.3s ease;
+        }
+
+
+        .results-area .label {
+            color: var(--text-color);
+             transition: color 0.3s ease;
+        }
+        .results-area .value {
+            font-weight: bold;
+            color: var(--accent-color);
+            transition: color 0.3s ease;
+            text-align: right;
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2em;
+            }
+            .tool-container {
+                padding: 20px;
+            }
+        }
+        @media (max-width: 480px) {
+            body { padding-top: 70px; padding-left:10px; padding-right:10px; }
+            .top-controls { top:10px; right:10px; gap: 8px; }
+            .top-controls .control-btn { width: 40px; height: 40px; font-size: 1.4em; } /* Adjusted for new class */
+
+            header h1 {
+                font-size: 1.8em;
+            }
+            .tool-container {
+                padding: 15px;
+            }
+            .results-area h2 {
+                font-size: 1.3em;
+            }
+            .results-area p {
+                font-size: 0.95em;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 3px;
+            }
+            .results-area .value {
+                text-align: left;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="top-controls">
+        <a href="index.html" id="back-to-main" class="control-btn" title="На главную">⬅️</a>
+        <button id="theme-switcher" class="control-btn" title="Переключить тему">🌙</button>
+        <button id="language-switcher" class="control-btn" title="Сменить язык">🌍</button>
+    </div>
+
+    <header>
+        <h1 data-lang-key="tool_title_counter">Счётчик Текста</h1>
+    </header>
+
+    <main class="tool-container">
+        <textarea id="textInput" rows="10" data-lang-placeholder-key="textarea_placeholder" placeholder="Введите или вставьте ваш текст здесь..."></textarea>
+
+        <div class="results-area">
+            <h2 data-lang-key="results_title">Результаты Анализа:</h2>
+            <p>
+                <span class="label" data-lang-key="label_chars">Символы (с пробелами)</span>:
+                <strong id="charCount" class="value">0</strong>
+            </p>
+            <p>
+                <span class="label" data-lang-key="label_words">Слова</span>:
+                <strong id="wordCount" class="value">0</strong>
+            </p>
+            <p>
+                <span class="label" data-lang-key="label_pages">Страницы (≈1800 сим./стр)</span>:
+                <strong id="pageCount" class="value">0</strong>
+            </p>
+            <p>
+                <span class="label" data-lang-key="label_author_sheets">Авторские листы (≈40тыс. сим.)</span>:
+                <strong id="authorSheetCount" class="value">0.00</strong>
+            </p>
+            <p>
+                <span class="label" data-lang-key="label_book_percentage">Процент от книги (≈400тыс. сим.)</span>:
+                <strong id="bookPercentage" class="value">0.00%</strong>
+            </p>
+            <p>
+                <span class="label" data-lang-key="label_read_aloud">Время чтения вслух (≈130 сл./мин)</span>:
+                <strong id="readAloudTime" class="value">0 мин 0 сек</strong>
+            </p>
+            <p>
+                <span class="label" data-lang-key="label_read_silent">Время чтения про себя (≈1500 сим./мин)</span>:
+                <strong id="readSilentTime" class="value">0 мин 0 сек</strong>
+            </p>
+        </div>
+    </main>
+
+    <script>
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const languageSwitcher = document.getElementById('language-switcher');
+        const backToMainBtn = document.getElementById('back-to-main'); // Get the new button
+        const htmlElement = document.documentElement;
+        const textInputElement = document.getElementById('textInput');
+
+        // Result elements
+        const charCountEl = document.getElementById('charCount');
+        const wordCountEl = document.getElementById('wordCount');
+        const pageCountEl = document.getElementById('pageCount');
+        const authorSheetCountEl = document.getElementById('authorSheetCount');
+        const bookPercentageEl = document.getElementById('bookPercentage');
+        const readAloudTimeEl = document.getElementById('readAloudTime');
+        const readSilentTimeEl = document.getElementById('readSilentTime');
+
+        // --- Language Data ---
+        const langData = {
+            ru: {
+                page_title_counter: "Счётчик Текста",
+                tool_title_counter: "Счётчик Текста",
+                textarea_placeholder: "Введите или вставьте ваш текст здесь...",
+                results_title: "Результаты Анализа:",
+                label_chars: "Символы (с пробелами)",
+                label_words: "Слова",
+                label_pages: "Страницы (≈1800 сим./стр)",
+                label_author_sheets: "Авторские листы (≈40тыс. сим.)",
+                label_book_percentage: "Процент от книги (≈400тыс. сим.)",
+                label_read_aloud: "Время чтения вслух (≈130 сл./мин)",
+                label_read_silent: "Время чтения про себя (≈1500 сим./мин)",
+                unit_min: "мин",
+                unit_sec: "сек",
+                theme_switch_title: "Переключить тему",
+                lang_switch_title: "Сменить язык",
+                back_to_main_title: "На главную" // New translation key
+            },
+            en: {
+                page_title_counter: "Text Counter",
+                tool_title_counter: "Text Counter",
+                textarea_placeholder: "Enter or paste your text here...",
+                results_title: "Analysis Results:",
+                label_chars: "Characters (with spaces)",
+                label_words: "Words",
+                label_pages: "Pages (≈1800 chars/page)",
+                label_author_sheets: "Author's Sheets (≈40k chars)",
+                label_book_percentage: "Percentage of Book (≈400k chars)",
+                label_read_aloud: "Reading Time Aloud (≈130 wpm)",
+                label_read_silent: "Silent Reading Time (≈1500 cpm)",
+                unit_min: "min",
+                unit_sec: "sec",
+                theme_switch_title: "Switch Theme",
+                lang_switch_title: "Switch Language",
+                back_to_main_title: "Back to Main" // New translation key
+            }
+        };
+
+        let currentLang = localStorage.getItem('preferredLang') || 'ru';
+        let currentTheme = localStorage.getItem('preferredTheme') || 'light';
+
+        function applyLanguage(lang) {
+            htmlElement.setAttribute('lang', lang);
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (langData[lang] && langData[lang][key]) {
+                    if (el.tagName === 'TITLE' || el.tagName === 'H1' || el.tagName === 'H2' || el.classList.contains('label')) {
+                        el.textContent = langData[lang][key];
+                    }
+                }
+            });
+             // Special handling for placeholder
+            const placeholderKey = textInputElement.dataset.langPlaceholderKey;
+            if (langData[lang] && langData[lang][placeholderKey]) {
+                textInputElement.setAttribute('placeholder', langData[lang][placeholderKey]);
+            }
+
+            themeSwitcher.setAttribute('title', langData[lang].theme_switch_title);
+            languageSwitcher.setAttribute('title', langData[lang].lang_switch_title);
+            if (backToMainBtn) { // Set title for the back button
+                backToMainBtn.setAttribute('title', langData[lang].back_to_main_title);
+            }
+            updateCalculations(); // Recalculate and reformat time with new lang units
+        }
+
+        languageSwitcher.addEventListener('click', () => {
+            currentLang = currentLang === 'ru' ? 'en' : 'ru';
+            localStorage.setItem('preferredLang', currentLang);
+            applyLanguage(currentLang);
+        });
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                htmlElement.classList.add('dark-theme');
+                themeSwitcher.textContent = '☀️';
+            } else {
+                htmlElement.classList.remove('dark-theme');
+                themeSwitcher.textContent = '🌙';
+            }
+        }
+
+        themeSwitcher.addEventListener('click', () => {
+            currentTheme = htmlElement.classList.contains('dark-theme') ? 'light' : 'dark';
+            localStorage.setItem('preferredTheme', currentTheme);
+            applyTheme(currentTheme);
+        });
+
+        function formatTime(totalMinutes, lang) {
+            if (isNaN(totalMinutes) || totalMinutes === 0) {
+                return `0 ${langData[lang].unit_min} 0 ${langData[lang].unit_sec}`;
+            }
+            const minutes = Math.floor(totalMinutes);
+            const seconds = Math.round((totalMinutes - minutes) * 60);
+            
+            if (minutes === 0 && seconds === 0) return `0 ${langData[lang].unit_sec}`;
+            
+            let timeString = "";
+            if (minutes > 0) {
+                timeString += `${minutes} ${langData[lang].unit_min}`;
+            }
+            if (seconds > 0) {
+                if (minutes > 0) timeString += " ";
+                timeString += `${seconds} ${langData[lang].unit_sec}`;
+            }
+            if (timeString === "" && totalMinutes > 0) {
+                 return `1 ${langData[lang].unit_sec}`;
+            }
+            return timeString || `0 ${langData[lang].unit_sec}`;
+        }
+
+        function updateCalculations() {
+            const text = textInputElement.value;
+            const charCount = text.length;
+            const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).filter(Boolean).length;
+
+            charCountEl.textContent = charCount;
+            wordCountEl.textContent = words;
+            pageCountEl.textContent = charCount > 0 ? Math.ceil(charCount / 1800) : 0;
+            authorSheetCountEl.textContent = charCount > 0 ? (charCount / 40000).toFixed(2) : "0.00";
+            bookPercentageEl.textContent = charCount > 0 ? `${(charCount / 400000 * 100).toFixed(2)}%` : "0.00%";
+            
+            const readAloudMinutes = words / 130;
+            readAloudTimeEl.textContent = formatTime(readAloudMinutes, currentLang);
+
+            const readSilentMinutes = charCount / 1500;
+            readSilentTimeEl.textContent = formatTime(readSilentMinutes, currentLang);
+        }
+
+        textInputElement.addEventListener('input', updateCalculations);
+
+        // Initial Load
+        applyTheme(currentTheme);
+        applyLanguage(currentLang);
+        if (textInputElement.value === "") {
+            updateCalculations();
+        }
+
+    </script>
+</body>
+</html>
