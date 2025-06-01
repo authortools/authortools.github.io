@@ -1,0 +1,442 @@
+:root {
+    --bg-color: #f0f2f5; 
+    --card-bg-color: #ffffff; 
+    --chat-bg-color: #ffffff;
+    --text-color: #050505; 
+    --secondary-text-color: #65676b; 
+    --border-color: #dddfe2;
+    --input-bg-color: #f0f2f5; 
+    --input-border-color: #ccd0d5;
+    --sent-msg-bg: #0084ff; 
+    --sent-msg-text: #ffffff;
+    --received-msg-bg: #e4e6eb; 
+    --received-msg-text: #050505;
+    --primary-accent-color: #1877f2; 
+    --primary-accent-hover: #166fe5;
+    --icon-color: #606770; 
+    --settings-panel-bg: #f7f7f7; 
+    --fieldset-border: #d1d1d1;
+    --panel-row-bg: var(--card-bg-color);
+    --easter-egg-color1: #ffeb3b;
+    --easter-egg-color2: #4caf50;
+
+    --ui-font-family-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --ui-font-family-serif: Georgia, "Times New Roman", Times, serif;
+    --ui-font-family-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    --ui-font-family: var(--ui-font-family-system); /* Default */
+
+    --base-message-text-size: 0.95em;
+    --base-message-timestamp-size: 0.7em;
+    --base-input-font-size: 0.9em;
+    --base-header-font-size: 1.1em;
+    --base-settings-label-font-size: 0.9em;
+    --base-settings-option-font-size: 0.85em;
+
+    --bottom-panel-height: 0px; /* Will be set by JS for settings panel positioning */
+    --header-height: 0px; /* Will be set by JS */
+}
+
+html.dark-theme {
+    --bg-color: #121212; 
+    --card-bg-color: #1e1e1e; 
+    --chat-bg-color: #1e1e1e;
+    --text-color: #e0e0e0; 
+    --secondary-text-color: #b0b3b8; 
+    --border-color: #3a3b3c;
+    --input-bg-color: #2c2c2c; 
+    --input-border-color: #404040;
+    --received-msg-bg: #3a3b3c; 
+    --received-msg-text: #e0e0e0;
+    --icon-color: #b0b3b8; 
+    --settings-panel-bg: #282828; 
+    --fieldset-border: #444444;
+    --panel-row-bg: var(--card-bg-color);
+}
+
+*, *::before, *::after { 
+    box-sizing: border-box; 
+}
+html { 
+    height: 100%; 
+    background-color: var(--bg-color); 
+    transition: background-color 0.3s; 
+}
+body {
+    margin: 0; 
+    padding: 0;
+    font-family: var(--ui-font-family); /* Apply selected font family */
+    height: 100vh; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    color: var(--text-color); 
+    transition: color 0.3s, font-family 0.3s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.messenger-card {
+    width: 100%; 
+    height: 100%; 
+    max-width: 400px; 
+    max-height: 700px;
+    background-color: var(--card-bg-color); 
+    border-radius: 12px;
+    box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; /* Important for positioning settings panel correctly */
+    transition: background-color 0.3s;
+    position: relative; /* For absolute positioning of settings panel */
+}
+
+.chat-header {
+    padding: 12px 15px; 
+    background-color: var(--card-bg-color); 
+    border-bottom: 1px solid var(--border-color);
+    text-align: center; 
+    font-weight: 600;
+    font-size: var(--base-header-font-size);
+    color: var(--text-color);
+    flex-shrink: 0; 
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    user-select: none;
+    z-index: 2; /* Ensure header is above settings panel */
+}
+.chat-container {
+    flex-grow: 1; 
+    overflow-y: auto; 
+    padding: 15px; 
+    display: flex; 
+    flex-direction: column;
+    background-color: var(--chat-bg-color); 
+    transition: background-color 0.3s;
+    -ms-overflow-style: none; 
+    scrollbar-width: none;
+}
+.chat-container::-webkit-scrollbar { 
+    display: none; 
+}
+
+.message {
+    max-width: 75%;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 18px;
+    line-height: 1.4;
+    word-wrap: break-word; 
+    overflow-wrap: break-word; 
+    position: relative;
+    transition: background-color 0.3s, color 0.3s;
+}
+.message .message-text {
+    margin: 0;
+    font-size: var(--base-message-text-size);
+}
+.message .message-text strong { font-weight: bold; }
+.message .message-text em { font-style: italic; }
+.message .message-text s { text-decoration: line-through; }
+.message .message-text code {
+    background-color: rgba(0,0,0,0.05);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    font-family: var(--ui-font-family-mono); /* Use mono font for code */
+    font-size: 0.9em; 
+}
+html.dark-theme .message .message-text code {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.message .timestamp {
+    font-size: var(--base-message-timestamp-size);
+    color: var(--secondary-text-color);
+    text-align: right;
+    display: block;
+    margin-top: 4px;
+    opacity: 0.8;
+}
+.message.sent {
+    background-color: var(--sent-msg-bg);
+    color: var(--sent-msg-text);
+    align-self: flex-end;
+    margin-left: auto;
+}
+.message.sent .timestamp {
+    color: var(--sent-msg-text); 
+    opacity: 0.8;
+}
+.message.received {
+    background-color: var(--received-msg-bg);
+    color: var(--received-msg-text);
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+.chat-container:empty::before {
+    content: attr(data-empty-message); 
+    align-self: center; 
+    justify-self: center;
+    text-align: center; 
+    color: var(--secondary-text-color); 
+    font-style: italic; 
+    margin-top: auto; 
+    margin-bottom: auto;
+}
+
+/* Settings Panel - Positioned above bottom-panel */
+.global-settings-container {
+    position: absolute;
+    bottom: var(--bottom-panel-height); 
+    left: 0;
+    right: 0;
+    background-color: var(--settings-panel-bg);
+    border-top: 1px solid var(--border-color);
+    max-height: calc(100% - var(--bottom-panel-height) - var(--header-height)); 
+    overflow-y: auto;
+    z-index: 1; 
+
+    padding: 0 18px; /* Horizontal padding applied, vertical padding on .open */
+    opacity: 0;
+    transform: translateY(100%); 
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out, padding-top 0.3s ease-in-out, padding-bottom 0.3s ease-in-out;
+}
+.global-settings-container.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.settings-group { 
+    padding: 8px 0 12px; 
+}
+.settings-group legend, .settings-group > label.settings-label-block {
+    display: block; 
+    font-weight: 600; 
+    margin-bottom: 10px; 
+    font-size: var(--base-settings-label-font-size); 
+    color: var(--text-color);
+}
+.settings-group fieldset {
+    border: 1px solid var(--fieldset-border); 
+    border-radius: 6px;
+    padding: 15px 18px; 
+    margin-bottom: 12px; 
+    background-color: var(--panel-row-bg);
+}
+.settings-group input[type="time"] {
+    padding: 7px 8px; 
+    border-radius: 4px; 
+    border: 1px solid var(--input-border-color);
+    background-color: var(--input-bg-color); 
+    color: var(--text-color);
+    font-size: var(--base-settings-option-font-size); 
+    margin-bottom: 5px; 
+}
+.settings-group input[type="time"]:disabled { 
+    background-color: #e0e0e0; 
+    opacity: 0.7; 
+}
+html.dark-theme .settings-group input[type="time"]:disabled { 
+    background-color: #404040; 
+    opacity: 0.7; 
+}
+
+.settings-group .checkbox-label, .settings-group .radio-group label {
+    display: block; 
+    margin-bottom: 8px; 
+    padding-left: 3px; 
+    font-size: var(--base-settings-option-font-size); 
+    color: var(--text-color); 
+    cursor: pointer;
+}
+.settings-group .checkbox-label:first-of-type { 
+    margin-top: 8px; 
+}
+.settings-group .checkbox-label input[type="checkbox"],
+.settings-group .radio-group input[type="radio"] {
+    margin-right: 8px; 
+    vertical-align: middle;
+}
+.settings-group .radio-group { 
+    display: flex; 
+    flex-direction: column; /* Stack radio buttons vertically */
+    gap: 5px; 
+    margin-top: 8px; 
+}
+
+
+/* Bottom Panel (Inputs) */
+.bottom-panel {
+    display: flex; 
+    flex-direction: column;
+    background-color: var(--panel-row-bg);
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0; 
+    transition: background-color 0.3s, border-color 0.3s;
+    z-index: 2; /* Ensure bottom panel is above settings panel */
+}
+.bottom-panel-content { 
+    display: flex; 
+    flex-direction: column; 
+}
+.panel-row {
+    display: flex; 
+    align-items: center; 
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border-color); 
+    min-height: 48px;
+}
+.panel-row:last-child { 
+    border-bottom: none; 
+}
+.chat-name-row input[type="text"] {
+    flex-grow: 1; 
+    padding: 8px 10px; 
+    border: 1px solid var(--input-border-color);
+    border-radius: 6px; 
+    font-size: var(--base-input-font-size);
+    background-color: var(--input-bg-color); 
+    color: var(--text-color); 
+    margin-right: 8px;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    overflow: hidden; 
+    white-space: nowrap;
+}
+.chat-name-row #settingsToggleButton {
+    padding: 0; 
+    width: 36px; 
+    height: 36px; 
+    background-color: transparent; 
+    color: var(--icon-color);
+    border: none; 
+    border-radius: 50%; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    transition: color 0.2s, background-color 0.2s; 
+    flex-shrink: 0;
+}
+.chat-name-row #settingsToggleButton:hover { 
+    background-color: var(--input-bg-color); 
+}
+.chat-name-row #settingsToggleButton svg { 
+    width: 20px; 
+    height: 20px; 
+    fill: currentColor; 
+}
+
+.message-sender-row { 
+    gap: 8px; 
+}
+.message-sender-row .sender-label {
+    font-size: var(--base-input-font-size); 
+    font-weight: 500; 
+    color: var(--text-color);
+    width: 35px; 
+    flex-shrink: 0; 
+    text-align: right;
+}
+.message-sender-row textarea {
+    flex-grow: 1; 
+    padding: 8px 10px; 
+    border: 1px solid var(--input-border-color);
+    border-radius: 18px; 
+    font-size: var(--base-input-font-size);
+    background-color: var(--input-bg-color); 
+    color: var(--text-color); 
+    resize: none;
+    min-height: 36px; 
+    max-height: 70px; 
+    line-height: 1.4;
+    overflow-y: hidden; 
+    -ms-overflow-style: none; 
+    scrollbar-width: none;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+.message-sender-row textarea::-webkit-scrollbar { 
+    display: none; 
+}
+.message-sender-row textarea::placeholder { 
+    color: var(--secondary-text-color); 
+}
+.message-sender-row button {
+    padding: 0; 
+    width: 36px; 
+    height: 36px; 
+    background-color: transparent; 
+    color: var(--primary-accent-color);
+    border: none; 
+    border-radius: 50%; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    transition: color 0.2s, background-color 0.2s; 
+    flex-shrink: 0;
+}
+.message-sender-row button:hover { 
+    background-color: var(--input-bg-color); 
+}
+.message-sender-row button svg { 
+    width: 20px; 
+    height: 20px; 
+    fill: currentColor; 
+}
+
+/* Easter Egg CSS */
+body.konami-active { 
+    animation: konami-rainbow 5s infinite linear; 
+}
+@keyframes konami-rainbow {
+    0%{background-color:red}
+    16%{background-color:orange}
+    33%{background-color:yellow}
+    50%{background-color:green}
+    66%{background-color:blue}
+    83%{background-color:indigo}
+    100%{background-color:violet}
+}
+.party-mode::before {
+    content:'🎉🎊🥳🎈';
+    position:absolute;
+    top:5px;
+    left:5px;
+    font-size:1.5em;
+    animation:fall 3s infinite linear;
+    pointer-events:none
+}
+@keyframes fall {
+    0%{transform:translateY(-20px) rotate(0deg);opacity:1}
+    100%{transform:translateY(50px) rotate(360deg);opacity:0}
+}
+
+@media (max-width: 420px) {
+    .messenger-card { 
+        max-width: 100%; 
+        max-height: 100vh; 
+        height: 100vh; 
+        border-radius: 0; 
+        box-shadow: none; 
+    }
+    .panel-row { 
+        padding: 5px 8px; 
+        min-height: 44px;
+    }
+    .chat-name-row #settingsToggleButton, .message-sender-row button { 
+        width: 34px; 
+        height: 34px; 
+    }
+    .chat-name-row #settingsToggleButton svg, .message-sender-row button svg { 
+        width: 18px; 
+        height: 18px; 
+    }
+    .message-sender-row .sender-label { 
+        width: 30px; 
+    }
+    .global-settings-container { 
+        max-height: calc(100% - var(--bottom-panel-height) - var(--header-height)); /* Use header height var */
+    }
+}

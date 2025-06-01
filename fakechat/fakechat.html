@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fake Chat </title>
+    <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+
+    <div class="messenger-card" id="messengerCard">
+        <div class="chat-header" id="chatHeader">Fake Chat</div>
+
+        <!-- Settings Panel -->
+        <div class="global-settings-container" id="globalSettingsContainer">
+            <fieldset class="settings-group">
+                <legend id="timeSettingsLegend">Time Settings:</legend>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="useTimeShiftCheckbox" name="useTimeShift" checked>
+                    <span id="useTimeShiftLabel">Use time shift for messages</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="useCustomStartTimeCheckbox" name="useCustomStartTime">
+                    <span id="useCustomStartTimeLabel">Use custom start time (if shift is ON)</span>
+                </label>
+                <label for="chatStartTimeInput" id="chatStartTimeLabel" class="settings-label-block" style="margin-top: 10px;">Chat Start Time (HH:MM if shift & custom start ON):</label>
+                <input type="time" id="chatStartTimeInput" name="chatStartTime">
+            </fieldset>
+            <fieldset class="settings-group">
+                <legend id="themeLabel">Theme:</legend>
+                <div class="radio-group">
+                    <label><input type="radio" name="theme" value="light" checked> <span id="themeLightLabel">Light</span></label>
+                    <label><input type="radio" name="theme" value="dark"> <span id="themeDarkLabel">Dark</span></label>
+                </div>
+            </fieldset>
+             <fieldset class="settings-group">
+                <legend id="fontFamilyLabel">Font Family:</legend>
+                <div class="radio-group">
+                    <label><input type="radio" name="fontFamily" value="system" checked> <span id="fontFamilySystemLabel">System</span></label>
+                    <label><input type="radio" name="fontFamily" value="serif"> <span id="fontFamilySerifLabel">Serif</span></label>
+                    <label><input type="radio" name="fontFamily" value="mono"> <span id="fontFamilyMonoLabel">Monospace</span></label>
+                </div>
+            </fieldset>
+            <fieldset class="settings-group">
+                <legend id="languageLabel">Language:</legend>
+                <div class="radio-group">
+                    <label><input type="radio" name="language" value="en" checked> <span id="langEnLabel">English</span></label>
+                    <label><input type="radio" name="language" value="ru"> <span id="langRuLabel">Русский</span></label>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="chat-container" id="chatContainer" data-empty-message="No messages yet."></div>
+
+        <div class="bottom-panel" id="bottomPanel">
+            <div class="bottom-panel-content">
+                <div class="panel-row chat-name-row">
+                    <input type="text" id="chatNameInput" placeholder="Chat Name" maxlength="16">
+                    <button id="settingsToggleButton" aria-label="Toggle Settings Panel" aria-expanded="false">
+                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"></path></svg>
+                    </button>
+                </div>
+                <div class="panel-row message-sender-row">
+                    <span class="sender-label" id="meSenderLabel">Me:</span>
+                    <textarea id="meMessageInput" placeholder="Your message..." rows="1" maxlength="512"></textarea>
+                    <button id="sendAsMeButton" aria-label="Send as Me">
+                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    </button>
+                </div>
+                <div class="panel-row message-sender-row">
+                    <span class="sender-label" id="friendSenderLabel">F:</span>
+                    <textarea id="friendMessageInput" placeholder="Friend's message..." rows="1" maxlength="512"></textarea>
+                    <button id="sendAsFriendButton" aria-label="Send as Friend">
+                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="chat.js" defer></script>
+</body>
+</html>
