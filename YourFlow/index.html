@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поток | Финальная версия</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Ссылка на внешний файл стилей -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container" id="app-container">
+        <header>
+            <h1 data-lang-key="title">Поток</h1>
+            <p data-lang-key="subtitle">Начните писать, чтобы войти в режим фокуса.</p>
+        </header>
+
+        <main>
+            <div id="editor" contenteditable="true" data-lang-key="editor_placeholder" placeholder="Начните писать здесь..."></div>
+            <button id="idea-button" class="btn btn-secondary" title="Предложить идею" data-lang-key="btn_idea">Идея</button>
+            <button id="copy-editor-button" class="btn btn-secondary" title="Копировать текст" data-lang-key="btn_copy">Копировать</button>
+        </main>
+        
+        <div class="stats-bar">
+            <span data-lang-key="stats_chars">Символы</span>: <span id="char-count">0</span>
+            <span data-lang-key="stats_words">Слова</span>: <span id="word-count">0</span>
+            <span data-lang-key="stats_pages">Страницы</span>: <span id="page-count">0</span>
+        </div>
+
+        <div class="settings-container collapsed" id="settings-container">
+            <div class="settings-header" id="settings-header">
+                <span data-lang-key="settings_header">Настройки</span>
+                <span class="arrow">&#9660;</span>
+            </div>
+            <div class="controls-wrapper">
+                <div class="settings-section">
+                    <h5 class="settings-section-title" data-lang-key="group_title_session">Режим Сессии</h5>
+                    <div class="settings-section-content">
+                        <div class="control-group">
+                            <label for="mode-select" data-lang-key="label_mode">Режим</label>
+                            <select id="mode-select">
+                                <option value="classic" data-lang-key="option_classic">Классический</option>
+                                <option value="sprint" data-lang-key="option_sprint">Спринт (время)</option>
+                                <option value="drive" data-lang-key="option_drive">Драйв (знаки)</option>
+                            </select>
+                        </div>
+                        <div class="control-group hidden" id="sprint-settings">
+                            <label for="sprint-duration" data-lang-key="label_sprint_duration">Длительность (мин)</label>
+                            <input type="number" id="sprint-duration" value="25" min="1">
+                        </div>
+                        <div class="control-group hidden" id="drive-settings">
+                            <label for="drive-goal" data-lang-key="label_drive_goal">Цель (знаков)</label>
+                            <input type="number" id="drive-goal" value="1800" min="100" step="100">
+                        </div>
+                        <div class="control-group">
+                            <label for="punishment-select" data-lang-key="label_punishment">Наказание</label>
+                            <select id="punishment-select">
+                                <option value="delete" data-lang-key="option_delete">Удаление</option>
+                                <option value="soft" data-lang-key="option_soft">Красные слова</option>
+                                <option value="shake" data-lang-key="option_shake">Тряска</option>
+                                <option value="hardcore" data-lang-key="option_hardcore">Без Backspace</option>
+                                <option value="impossible" data-lang-key="option_impossible">Невозможный</option>
+                            </select>
+                        </div>
+                        <div class="control-group" id="wait-time-group">
+                            <label for="wait-time" data-lang-key="label_wait_time">Ожидание (сек)</label>
+                            <input type="number" id="wait-time" value="5" min="1">
+                        </div>
+                        <div class="control-group" id="delete-speed-group">
+                            <label for="delete-speed" data-lang-key="label_delete_speed">Скорость (зн/сек)</label>
+                            <input type="number" id="delete-speed" value="3" min="1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h5 class="settings-section-title" data-lang-key="group_title_app">Настройки Приложения</h5>
+                    <div class="button-row">
+                        <button id="theme-switcher" class="btn btn-secondary" title="Переключить тему">🌙</button>
+                        <button id="language-switcher" class="btn btn-secondary" title="Сменить язык">🌍</button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                     <h5 class="settings-section-title" data-lang-key="group_title_actions">Действия с текстом</h5>
+                     <div class="button-row">
+                        <button id="save-button" class="btn btn-primary" data-lang-key="btn_save">Сохранить</button>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button id="stop-session-button" class="btn btn-danger hidden">
+        <span class="stop-btn-text" data-lang-key="btn_stop">Остановить</span>
+        <span class="stop-btn-icon">■</span>
+    </button>
+    <div id="success-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="success-title"></h2>
+            <p id="success-message"></p>
+            <button id="close-modal-button" class="btn btn-primary" data-lang-key="btn_modal_continue">Продолжить</button>
+        </div>
+    </div>
+
+    <!-- Ссылка на внешний файл JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
