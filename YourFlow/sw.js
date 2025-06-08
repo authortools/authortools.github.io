@@ -1,31 +1,34 @@
-// Версия кэша, меняем для принудительного обновления
-const CACHE_VERSION = 'v1.3-relative-paths';
+// Версия кэша. Увеличиваем, чтобы браузер точно обновил сервис-воркер.
+const CACHE_VERSION = 'v1.5-final-fix';
 const CACHE_NAME = `potok-app-cache-${CACHE_VERSION}`;
 
-// Оболочка приложения с ОТНОСИТЕЛЬНЫМИ путями
+// Полные, абсолютные URL-адреса для гарантированной работы на GitHub Pages
 const APP_SHELL_URLS = [
-  './',
-  './index.html',
-  './style.css',
-  './script.js',
-  './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  'https://authortools.github.io/YourFlow/',
+  'https://authortools.github.io/YourFlow/index.html',
+  'https://authortools.github.io/YourFlow/style.css',
+  'https://authortools.github.io/YourFlow/script.js',
+  'https://authortools.github.io/YourFlow/manifest.json',
+  'https://authortools.github.io/YourFlow/icons/icon-192.png',
+  'https://authortools.github.io/YourFlow/icons/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Установка с относительными путями');
+  console.log(`[Service Worker] Установка v${CACHE_VERSION}`);
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[Service Worker] Кэширование оболочки приложения');
+        console.log('[Service Worker] Кэширование оболочки приложения по абсолютным путям.');
         return cache.addAll(APP_SHELL_URLS);
+      })
+      .catch(err => {
+        console.error('[Service Worker] КАТАСТРОФА! Ошибка кэширования:', err);
       })
   );
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Активация');
+  console.log(`[Service Worker] Активация v${CACHE_VERSION}`);
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -44,12 +47,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      // Если ресурс есть в кэше - отдаем его
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      // Если ресурса нет в кэше - идем в сеть
-      return fetch(event.request);
+      return cachedResponse || fetch(event.request);
     })
   );
 });
