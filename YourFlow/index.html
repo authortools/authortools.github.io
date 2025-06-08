@@ -3,7 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Flow</title>
+    <title>Поток | Финальная версия</title>
+
+    <!-- ================== PWA и Мобильные улучшения: НАЧАЛО ================== -->
+    <!-- Ссылка на манифест веб-приложения -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Основной цвет темы для адресной строки в Android -->
+    <meta name="theme-color" content="#007bff">
+    
+    <!-- Мета-теги для iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Поток">
+    
+    <!-- Иконка для добавления на домашний экран iOS -->
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <!-- =================== PWA и Мобильные улучшения: КОНЕЦ =================== -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
@@ -33,7 +50,7 @@
         <div class="settings-container collapsed" id="settings-container">
             <div class="settings-header" id="settings-header">
                 <span data-lang-key="settings_header">Настройки</span>
-                <span class="arrow">&#9660;</span>
+                <span class="arrow">▼</span>
             </div>
             <div class="controls-wrapper">
                 <div class="settings-section">
@@ -108,11 +125,11 @@
     <!-- Ссылка на внешний файл JavaScript -->
     <script src="script.js"></script>
 
-     <!-- ================== PWA Регистрация Service Worker: НАЧАЛО ================== -->
+    <!-- ================== PWA Регистрация Service Worker: НАЧАЛО ================== -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
+          navigator.serviceWorker.register('sw.js') // Для GitHub Pages лучше использовать относительный путь
             .then(registration => {
               console.log('ServiceWorker успешно зарегистрирован: ', registration.scope);
             })
@@ -123,6 +140,5 @@
       }
     </script>
     <!-- =================== PWA Регистрация Service Worker: КОНЕЦ =================== -->
-    
 </body>
 </html>
