@@ -107,5 +107,22 @@
 
     <!-- Ссылка на внешний файл JavaScript -->
     <script src="script.js"></script>
+
+     <!-- ================== PWA Регистрация Service Worker: НАЧАЛО ================== -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('ServiceWorker успешно зарегистрирован: ', registration.scope);
+            })
+            .catch(error => {
+              console.log('Ошибка регистрации ServiceWorker: ', error);
+            });
+        });
+      }
+    </script>
+    <!-- =================== PWA Регистрация Service Worker: КОНЕЦ =================== -->
+    
 </body>
 </html>
