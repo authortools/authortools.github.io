@@ -3,25 +3,26 @@
   "short_name": "Поток",
   "description": "Начните писать, чтобы войти в режим фокуса и победить прокрастинацию.",
   "lang": "ru-RU",
-  "start_url": "/",
+  "start_url": "/YourFlow/",
+  "scope": "/YourFlow/",
   "display": "standalone",
   "background_color": "#f4f7f9",
   "theme_color": "#007bff",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/maskable-icon-512.png",
+      "src": "icons/maskable-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
