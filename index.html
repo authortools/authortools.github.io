@@ -239,6 +239,21 @@
         const htmlElement = document.documentElement;
         const mainTitle = document.querySelector('header h1');
 
+         if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            if (tg.colorScheme === 'dark') {
+                htmlElement.classList.add('dark-theme');
+                themeSwitcher.textContent = '☀️';
+                localStorage.setItem('preferredTheme', 'dark');
+            } else {
+                htmlElement.classList.remove('dark-theme');
+                themeSwitcher.textContent = '🌙';
+                localStorage.setItem('preferredTheme', 'light');
+            }
+            themeSwitcher.style.display = 'none';
+        }
+
         // --- Language Data ---
         const langData = {
             ru: {
