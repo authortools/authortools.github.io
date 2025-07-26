@@ -59,6 +59,12 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
     border-radius: var(--border-radius);
     overflow: hidden;
 }
+
+/* ИСПРАВЛЕНИЕ: Новый стиль для инвертирования шкалы в режиме "Спринт" */
+#progress-container.sprint-mode-progress {
+    direction: rtl;
+}
+
 #progress-bar {
     height: 100%;
     width: 0%;
@@ -93,8 +99,6 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
 .settings-section-title { margin-bottom: 15px; font-weight: 500; opacity: 0.7; }
 .settings-section-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
 .button-row { display: flex; flex-wrap: wrap; gap: 10px; }
-
-/* Блок `.button-row .btn` был удален, теперь кнопки наследуют общее правило `.btn` */
 
 .main-actions-wrapper { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
 .main-actions-wrapper .btn { flex-shrink: 0; }
