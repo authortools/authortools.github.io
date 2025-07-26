@@ -6,18 +6,11 @@
     <title>Поток | Финальная версия</title>
 
     <!-- ================== PWA и Мобильные улучшения: НАЧАЛО ================== -->
-    <!-- Ссылка на манифест веб-приложения -->
     <link rel="manifest" href="manifest.json">
-    
-    <!-- Основной цвет темы для адресной строки в Android -->
     <meta name="theme-color" content="#007bff">
-    
-    <!-- Мета-теги для iOS Safari -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Поток">
-    
-    <!-- Иконка для добавления на домашний экран iOS -->
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <!-- =================== PWA и Мобильные улучшения: КОНЕЦ =================== -->
 
@@ -25,10 +18,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     
-    <!-- Ссылка на внешний файл стилей -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Индикатор прогресса для режимов Спринт/Драйв -->
+    <div id="progress-bar"></div>
+
     <div class="container" id="app-container">
         <header>
             <h1 data-lang-key="title">Поток</h1>
@@ -54,6 +49,7 @@
                     <span class="arrow">▼</span>
                 </div>
                 <div class="controls-wrapper">
+                    <!-- Секция: Режим сессии -->
                     <div class="settings-section">
                         <h5 class="settings-section-title" data-lang-key="group_title_session">Режим Сессии</h5>
                         <div class="settings-section-content">
@@ -94,22 +90,49 @@
                         </div>
                     </div>
 
+                    <!-- Секция: Настройки приложения -->
                     <div class="settings-section">
                         <h5 class="settings-section-title" data-lang-key="group_title_app">Настройки Приложения</h5>
                         <div class="button-row">
                             <button id="theme-switcher" class="btn btn-secondary" title="Переключить тему">🌙</button>
                             <button id="language-switcher" class="btn btn-secondary" title="Сменить язык">🌍</button>
                         </div>
+                        <div class="settings-section-content" style="margin-top: 15px;">
+                             <div class="control-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="sound-keypress-toggle">
+                                    <span data-lang-key="label_sound_keypress">Звук клавиш</span>
+                                </label>
+                             </div>
+                             <div class="control-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="sound-warning-toggle">
+                                    <span data-lang-key="label_sound_warning">Звуковое предупреждение</span>
+                                </label>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Секция: Черновики -->
+                    <div class="settings-section">
+                         <h5 class="settings-section-title" data-lang-key="group_title_drafts">Черновики</h5>
+                         <div class="button-row">
+                            <button id="drafts-button" class="btn btn-secondary" data-lang-key="btn_drafts">Мои черновики</button>
+                         </div>
                     </div>
                 </div>
             </div>
             <button id="save-button" class="btn btn-primary" data-lang-key="btn_save">Сохранить</button>
         </div>
     </div>
+
+    <!-- Кнопка остановки сессии -->
     <button id="stop-session-button" class="btn btn-danger hidden">
         <span class="stop-btn-text" data-lang-key="btn_stop">Остановить</span>
         <span class="stop-btn-icon">■</span>
     </button>
+    
+    <!-- Модальное окно: Успех -->
     <div id="success-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 id="success-title"></h2>
@@ -117,15 +140,32 @@
             <button id="close-modal-button" class="btn btn-primary" data-lang-key="btn_modal_continue">Продолжить</button>
         </div>
     </div>
+    
+    <!-- Модальное окно: Черновики -->
+    <div id="drafts-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 data-lang-key="modal_drafts_title">Мои черновики</h2>
+            <div id="new-draft-controls">
+                 <input type="text" id="new-draft-name" placeholder="Имя нового черновика...">
+                 <button id="add-new-draft-button" class="btn btn-secondary" data-lang-key="btn_add_draft">Создать</button>
+            </div>
+            <ul id="drafts-list">
+                <!-- Сюда будут добавляться черновики через JS -->
+            </ul>
+            <button id="close-drafts-modal-button" class="btn btn-primary" data-lang-key="btn_close_drafts">Закрыть</button>
+        </div>
+    </div>
 
-    <!-- Ссылка на внешний файл JavaScript -->
+    <!-- Аудиофайлы -->
+    <audio id="keypress-sound" src="sounds/keypress.mp3" preload="auto"></audio>
+    <audio id="warning-sound" src="sounds/warning.mp3" preload="auto"></audio>
+
+    <!-- Скрипты -->
     <script src="script.js"></script>
-
-    <!-- ================== PWA Регистрация Service Worker: НАЧАЛО ================== -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('sw.js') // Для GitHub Pages лучше использовать относительный путь
+          navigator.serviceWorker.register('sw.js')
             .then(registration => {
               console.log('ServiceWorker успешно зарегистрирован: ', registration.scope);
             })
@@ -135,6 +175,5 @@
         });
       }
     </script>
-    <!-- =================== PWA Регистрация Service Worker: КОНЕЦ =================== -->
 </body>
 </html>
