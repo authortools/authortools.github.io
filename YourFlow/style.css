@@ -60,7 +60,6 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
     overflow: hidden;
 }
 
-/* ИСПРАВЛЕНИЕ: Новый стиль для инвертирования шкалы в режиме "Спринт" */
 #progress-container.sprint-mode-progress {
     direction: rtl;
 }
@@ -84,6 +83,19 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
 .control-group label { font-weight: 500; color: var(--accent-color); }
 .control-group select, .control-group input[type="number"], .control-group input[type="text"] { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid var(--secondary-color); background-color: var(--bg-color); color: var(--text-color); }
 .control-group select:focus, .control-group input:focus { border-color: var(--accent-color); outline: none; }
+
+.checkbox-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+    color: var(--text-color);
+    font-weight: normal;
+}
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+}
 
 .btn { flex: 1; border: none; padding: 12px; border-radius: var(--border-radius); font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 5px var(--shadow-color); display: flex; align-items: center; justify-content: center; gap: 8px; }
 .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow-color); }
