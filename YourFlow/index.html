@@ -93,6 +93,13 @@
                                 <input type="number" id="delete-speed" value="3" min="1">
                             </div>
                         </div>
+                        <!-- НОВЫЙ ЭЛЕМЕНТ: Галочка для шкалы прогресса -->
+                        <div class="control-group" style="margin-top: 15px;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="show-progress-toggle" checked>
+                                <span data-lang-key="label_show_progress">Показывать шкалу прогресса</span>
+                            </label>
+                        </div>
                     </div>
 
                     <!-- Секция: Настройки приложения -->
@@ -126,8 +133,9 @@
         </div>
     </div>
 
-    <!-- Скрипты -->
+    <!-- ИЗМЕНЕНО: Возвращаем старое подключение скрипта -->
     <script src="script.js"></script>
+    
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
