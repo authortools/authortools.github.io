@@ -135,6 +135,9 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
     .stop-btn-icon { display: block; }
     
     #progress-container { display: none !important; }
+    
+    /* ИЗМЕНЕНО: Добавлено правило для скрытия галочки на мобильных */
+    #progress-toggle-group { display: none; }
 
     .mobile-only { display: flex !important; }
     .desktop-only { display: none !important; }
