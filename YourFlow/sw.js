@@ -11,8 +11,6 @@ const APP_SHELL_URLS = [
   'https://authortools.github.io/YourFlow/manifest.json',
   'https://authortools.github.io/YourFlow/icons/icon-192.png',
   'https://authortools.github.io/YourFlow/icons/icon-512.png',
-  'https://authortools.github.io/YourFlow/sounds/keypress.mp3', // <-- ДОБАВИТЬ
-  'https://authortools.github.io/YourFlow/sounds/warning.mp3'  // <-- ДОБАВИТЬ
 ];
 
 self.addEventListener('install', (event) => {
