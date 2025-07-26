@@ -4,11 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Поток | Финальная версия</title>
+    
+    <!-- ИСПРАВЛЕНИЕ: Добавлена ссылка на иконку для вкладок, закладок и PWA -->
+    <link rel="icon" href="icons/icon-192.png">
 
     <!-- ================== PWA и Мобильные улучшения: НАЧАЛО ================== -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
+    
+    <!-- ИСПРАВЛЕНИЕ: Добавлен новый стандартный мета-тег, старый оставлен для совместимости -->
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes"> 
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Поток">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -21,9 +27,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Индикатор прогресса для режимов Спринт/Драйв -->
-    <div id="progress-bar"></div>
-
     <div class="container" id="app-container">
         <header>
             <h1 data-lang-key="title">Поток</h1>
@@ -36,6 +39,11 @@
             <button id="copy-editor-button" class="btn btn-secondary" title="Копировать текст" data-lang-key="btn_copy">Копировать</button>
         </main>
         
+        <!-- НОВЫЙ ЭЛЕМЕНТ: Индикатор прогресса, изначально скрыт -->
+        <div id="progress-container" class="hidden">
+            <div id="progress-bar"></div>
+        </div>
+
         <div class="stats-bar">
             <span data-lang-key="stats_chars">Символы</span>: <span id="char-count">0</span>
             <span data-lang-key="stats_words">Слова</span>: <span id="word-count">0</span>
@@ -97,28 +105,6 @@
                             <button id="theme-switcher" class="btn btn-secondary" title="Переключить тему">🌙</button>
                             <button id="language-switcher" class="btn btn-secondary" title="Сменить язык">🌍</button>
                         </div>
-                        <div class="settings-section-content" style="margin-top: 15px;">
-                             <div class="control-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="sound-keypress-toggle">
-                                    <span data-lang-key="label_sound_keypress">Звук клавиш</span>
-                                </label>
-                             </div>
-                             <div class="control-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="sound-warning-toggle">
-                                    <span data-lang-key="label_sound_warning">Звуковое предупреждение</span>
-                                </label>
-                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Секция: Черновики -->
-                    <div class="settings-section">
-                         <h5 class="settings-section-title" data-lang-key="group_title_drafts">Черновики</h5>
-                         <div class="button-row">
-                            <button id="drafts-button" class="btn btn-secondary" data-lang-key="btn_drafts">Мои черновики</button>
-                         </div>
                     </div>
                 </div>
             </div>
@@ -140,25 +126,6 @@
             <button id="close-modal-button" class="btn btn-primary" data-lang-key="btn_modal_continue">Продолжить</button>
         </div>
     </div>
-    
-    <!-- Модальное окно: Черновики -->
-    <div id="drafts-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h2 data-lang-key="modal_drafts_title">Мои черновики</h2>
-            <div id="new-draft-controls">
-                 <input type="text" id="new-draft-name" placeholder="Имя нового черновика...">
-                 <button id="add-new-draft-button" class="btn btn-secondary" data-lang-key="btn_add_draft">Создать</button>
-            </div>
-            <ul id="drafts-list">
-                <!-- Сюда будут добавляться черновики через JS -->
-            </ul>
-            <button id="close-drafts-modal-button" class="btn btn-primary" data-lang-key="btn_close_drafts">Закрыть</button>
-        </div>
-    </div>
-
-    <!-- Аудиофайлы -->
-    <audio id="keypress-sound" src="sounds/keypress.mp3" preload="auto"></audio>
-    <audio id="warning-sound" src="sounds/warning.mp3" preload="auto"></audio>
 
     <!-- Скрипты -->
     <script src="script.js"></script>
