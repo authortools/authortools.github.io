@@ -94,7 +94,12 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
 .settings-section-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
 .button-row { display: flex; flex-wrap: wrap; gap: 10px; }
 
-/* ИСПРАВЛЕНО: Возвращаем вертикальное расположение по умолчанию */
+/* ИСПРАВЛЕНИЕ: Это правило не дает кнопкам настроек сжиматься до квадратов */
+.button-row .btn {
+    flex-grow: 0;
+    min-width: 50px;
+}
+
 .main-actions-wrapper { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
 .main-actions-wrapper .btn { flex-shrink: 0; }
 
@@ -122,7 +127,6 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
     .mobile-only { display: flex !important; }
     .desktop-only { display: none !important; }
 
-    /* ИСПРАВЛЕНО: Явно указываем горизонтальное расположение для мобильных */
     .main-actions-wrapper { flex-direction: row; flex-wrap: wrap; }
     .settings-container { flex-basis: 100%; }
     .main-actions-wrapper .btn { flex-grow: 1; }
