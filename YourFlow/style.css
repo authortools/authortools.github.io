@@ -52,7 +52,6 @@ main { position: relative; }
 main:hover #copy-editor-button, #copy-editor-button:hover,
 main:hover #idea-button, #idea-button:hover { opacity: 1; }
 
-/* НОВЫЕ СТИЛИ: Индикатор прогресса */
 #progress-container {
     width: 100%;
     height: 10px;
@@ -62,12 +61,12 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
 }
 #progress-bar {
     height: 100%;
-    width: 0%; /* Управляется через JS */
+    width: 0%;
     background-color: var(--accent-color);
     transition: width 0.3s ease-out;
 }
 
-.stats-bar { display: flex; justify-content: space-around; background: var(--primary-color); padding: 10px; border-radius: var(--border-radius); border: 1px solid var(--secondary-color); font-size: 0.9rem; font-weight: 500; transition: all 0.4s ease; }
+.stats-bar { display: flex; justify-content: space-around; background: var(--primary-color); padding: 10px; border-radius: var(--border-radius); border: 1px solid var(--secondary-color); font-size: 0.9rem; font-weight: 500; transition: all 0.4s ease; flex-wrap: wrap; gap: 15px; }
 .settings-container { flex-grow: 1; width: 100%; border-radius: var(--border-radius); border: 1px solid var(--secondary-color); background: var(--primary-color); overflow: hidden; transition: all 0.4s ease; }
 .settings-header { padding: 15px; font-size: 1.2rem; font-weight: 500; color: var(--accent-color); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
 .settings-header .arrow { transition: transform 0.3s ease; }
@@ -80,7 +79,7 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
 .control-group select, .control-group input[type="number"], .control-group input[type="text"] { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid var(--secondary-color); background-color: var(--bg-color); color: var(--text-color); }
 .control-group select:focus, .control-group input:focus { border-color: var(--accent-color); outline: none; }
 
-.btn { flex: 1; border: none; padding: 12px; border-radius: var(--border-radius); font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 5px var(--shadow-color); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn { border: none; padding: 12px; border-radius: var(--border-radius); font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 5px var(--shadow-color); display: flex; align-items: center; justify-content: center; gap: 8px; }
 .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow-color); }
 .btn:active:not(:disabled) { transform: translateY(0); box-shadow: 0 2px 5px var(--shadow-color); }
 .btn:disabled { opacity: 0.7; cursor: not-allowed; }
@@ -95,7 +94,8 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
 .settings-section-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
 .button-row { display: flex; flex-wrap: wrap; gap: 10px; }
 
-.main-actions-wrapper { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
+.main-actions-wrapper { display: flex; flex-direction: row; align-items: flex-start; gap: 10px; }
+.main-actions-wrapper .btn { flex-shrink: 0; }
 
 #stop-session-button { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 200px; z-index: 100; flex: none; }
 .stop-btn-icon { display: none; font-size: 1.5rem; line-height: 1; }
@@ -103,6 +103,10 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
 .focus-mode header, .focus-mode .stats-bar, .focus-mode .main-actions-wrapper, .focus-mode #progress-container { opacity: 0; visibility: hidden; max-height: 0; margin: 0 !important; padding: 0 !important; border: none; }
 .focus-mode #copy-editor-button, .focus-mode #idea-button { display: none; }
 .hidden { display: none !important; }
+
+/* Стили для адаптивных кнопок */
+.mobile-only { display: none; }
+
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
 .modal-content { background: var(--primary-color); padding: 30px; border-radius: var(--border-radius); text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.2); max-width: 90%; width: 500px; display: flex; flex-direction: column; }
 .modal-content h2 { color: var(--success-color); margin-bottom: 15px; font-size: 2rem; }
@@ -112,11 +116,13 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
     #stop-session-button { left: 15px; transform: none; width: 55px; height: 55px; padding: 0; }
     .stop-btn-text { display: none; }
     .stop-btn-icon { display: block; }
-}
+    
+    #progress-container { display: none !important; }
 
-/* НОВЫЙ МЕДИА-ЗАПРОС: Скрывает индикатор прогресса на мобильных устройствах */
-@media (max-width: 768px) {
-    #progress-container {
-        display: none !important;
-    }
+    /* Показываем мобильную кнопку и скрываем десктопную */
+    .mobile-only { display: flex !important; }
+    .desktop-only { display: none !important; }
+
+    .main-actions-wrapper { flex-wrap: wrap; }
+    .settings-container { flex-basis: 100%; }
 }
