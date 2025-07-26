@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         stopSessionButton: document.getElementById('stop-session-button'), saveButton: document.getElementById('save-button'),
         ideaButton: document.getElementById('idea-button'),
         copyEditorButton: document.getElementById('copy-editor-button'),
-        mobileCopyEditorButton: document.getElementById('mobile-copy-editor-button'), // Мобильная кнопка
+        mobileCopyEditorButton: document.getElementById('mobile-copy-editor-button'),
         themeSwitcher: document.getElementById('theme-switcher'), languageSwitcher: document.getElementById('language-switcher'),
         settingsContainer: document.getElementById('settings-container'), settingsHeader: document.getElementById('settings-header'),
         progressContainer: document.getElementById('progress-container'),
@@ -47,6 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
     // =================================================================================
     const debounce = (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; };
+    const saveSelection = () => window.getSelection().rangeCount > 0 ? window.getSelection().getRangeAt(0) : null;
+    const restoreSelection = (range) => { if (range) { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } };
     const setCaretAtEnd = () => { const range = document.createRange(); const sel = window.getSelection(); range.selectNodeContents(dom.editor); range.collapse(false); sel.removeAllRanges(); sel.addRange(range); };
 
     // =================================================================================
@@ -97,9 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'delete' || type === 'hardcore' || type === 'impossible') punishByDeletion();
         if (type === 'shake' || type === 'impossible') dom.body.classList.add('punishment-shake-active');
     };
-
-    // ИСПРАВЛЕНО: Убрано сохранение/восстановление курсора
+    
+    // ИСПРАВЛЕНО: Возвращено сохранение и восстановление курсора
     const punishBySurgicalDeletion = () => {
+        const savedRange = saveSelection();
         let lastNode = dom.editor.lastChild;
         while(lastNode) {
             if (lastNode.nodeType === Node.TEXT_NODE && lastNode.textContent.length > 0) {
@@ -121,14 +124,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         updateStats();
+        restoreSelection(savedRange);
     };
 
     const punishByDeletion = () => { clearInterval(state.punishmentInterval); const speed = parseInt(dom.deleteSpeedInput.value, 10) || 3; dom.editor.classList.add('punishment-deleting'); state.punishmentInterval = setInterval(punishBySurgicalDeletion, 1000 / speed); };
     
-    // ИСПРАВЛЕНО: Убрано сохранение/восстановление курсора
+    // ИСПРАВЛЕНО: Возвращено сохранение и восстановление курсора
     const punishBySoft = () => {
         clearInterval(state.punishmentInterval);
         state.punishmentInterval = setInterval(() => {
+            const savedRange = saveSelection();
             const walker = document.createTreeWalker(dom.editor, NodeFilter.SHOW_TEXT, null, false);
             let nodes = [];
             while (walker.nextNode()) nodes.push(walker.currentNode);
@@ -145,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const span = document.createElement('span');
                         span.className = 'punishment-word';
                         range.surroundContents(span);
+                        restoreSelection(savedRange);
                         return;
                     }
                 }
@@ -166,14 +172,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mode === 'sprint') {
             const duration = (parseInt(dom.sprintDurationInput.value, 10) || 25) * 60 * 1000;
             const startTime = Date.now();
-            dom.progressBar.style.width = '0%';
+            dom.progressBar.style.width = '100%'; // ИСПРАВЛЕНО: Начинаем с полной шкалы
             state.sessionTimer = setTimeout(() => completeSession(LANG_DATA[state.currentLang].modal_sprint_title), duration);
             
             clearInterval(state.sessionProgressInterval);
             state.sessionProgressInterval = setInterval(() => {
                 const elapsed = Date.now() - startTime;
-                const percentage = Math.min((elapsed / duration) * 100, 100);
-                dom.progressBar.style.width = `${percentage}%`;
+                // ИСПРАВЛЕНО: Шкала опустошается, а не заполняется
+                const percentage = 100 - (elapsed / duration) * 100;
+                dom.progressBar.style.width = `${Math.max(0, percentage)}%`;
             }, 1000);
         } else if (mode === 'drive') {
             dom.progressBar.style.width = '0%';
@@ -241,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
         link.click();
     });
     
-    // Общая функция для копирования
     const handleCopyClick = () => {
         const textToCopy = dom.editor.textContent;
         if (!textToCopy) return;
