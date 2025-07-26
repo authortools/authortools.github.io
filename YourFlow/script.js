@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveToLocalStorage = () => localStorage.setItem('writer-app-html', dom.editor.innerHTML);
     const loadFromLocalStorage = () => { dom.editor.innerHTML = localStorage.getItem('writer-app-html') || ''; updateStats(); };
     
-    const debouncedSaveAndStats = debounce(() => { updateStats(); saveToLocalStorage(); }, 300);
+    const debouncedSave = debounce(saveToLocalStorage, 300);
 
     const enterFocusMode = () => { dom.appContainer.classList.add('focus-mode'); dom.stopSessionButton.classList.remove('hidden'); };
     const exitFocusMode = () => { dom.appContainer.classList.remove('focus-mode'); dom.stopSessionButton.classList.add('hidden'); };
@@ -110,9 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let lastNode = dom.editor.lastChild;
         while(lastNode) {
             if (lastNode.nodeType === Node.TEXT_NODE && lastNode.textContent.length > 0) {
-                const nodeValue = lastNode.nodeValue;
-                // Вместо замены всего текста, используем deleteData для минимального воздействия
-                lastNode.deleteData(nodeValue.length - 1, 1);
+                lastNode.deleteData(lastNode.nodeValue.length - 1, 1);
                 break;
             }
             if (lastNode.nodeType === Node.ELEMENT_NODE && lastNode.tagName === 'BR') {
@@ -130,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         updateStats();
-        // ИСПРАВЛЕНО: Принудительно ставим курсор в конец, чтобы избежать прыжка
         setCaretAtEnd();
     };
 
@@ -155,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         const span = document.createElement('span');
                         span.className = 'punishment-word';
                         range.surroundContents(span);
-                        // ИСПРАВЛЕНО: Принудительно ставим курсор в конец, чтобы избежать прыжка
                         setCaretAtEnd();
                         return;
                     }
@@ -176,9 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (mode === 'sprint') {
+            dom.progressContainer.classList.add('sprint-mode-progress');
             const duration = (parseInt(dom.sprintDurationInput.value, 10) || 25) * 60 * 1000;
             const startTime = Date.now();
-            dom.progressBar.style.width = '100%'; // Начинаем с полной шкалы
+            dom.progressBar.style.width = '100%';
             state.sessionTimer = setTimeout(() => completeSession(LANG_DATA[state.currentLang].modal_sprint_title), duration);
             
             clearInterval(state.sessionProgressInterval);
@@ -187,9 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const percentage = 100 - (elapsed / duration) * 100;
                 dom.progressBar.style.width = `${Math.max(0, percentage)}%`;
             }, 1000);
-        } else if (mode === 'drive') {
-            dom.progressBar.style.width = '0%';
-            updateStats();
+        } else {
+            dom.progressContainer.classList.remove('sprint-mode-progress');
+            if (mode === 'drive') {
+                dom.progressBar.style.width = '0%';
+                updateStats();
+            }
         }
     };
     
@@ -200,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resetAllPunishments();
         exitFocusMode();
         dom.progressContainer.classList.add('hidden');
+        dom.progressContainer.classList.remove('sprint-mode-progress');
 
         if (showCongrats) {
             dom.successTitleEl.textContent = title;
@@ -224,9 +225,14 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.editor.addEventListener('input', () => {
         if (state.isProgrammaticChange) return;
         if (dom.editor.textContent.length >= CHAR_LIMIT) { const text = dom.editor.textContent.slice(0, CHAR_LIMIT); dom.editor.textContent = text; setCaretAtEnd(); dom.editor.classList.add('limit-reached'); setTimeout(() => dom.editor.classList.remove('limit-reached'), 500); return; }
-        if (!state.isWritingSessionLive) startSession(dom.modeSelect.value);
+        if (!state.isWritingSessionLive) {
+            startSession(dom.modeSelect.value);
+        }
+        
+        updateStats();
+        debouncedSave();
+        
         armPunishmentTimer();
-        debouncedSaveAndStats();
     });
 
     dom.editor.addEventListener('keydown', (e) => { const type = dom.punishmentSelect.value; const isHardcore = (type === 'hardcore' || type === 'impossible') && state.isWritingSessionLive; if (isHardcore && (e.key === 'Backspace' || e.key === 'Delete')) e.preventDefault(); });
@@ -284,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.copyEditorButton.addEventListener('click', handleCopyClick);
     dom.mobileCopyEditorButton.addEventListener('click', handleCopyClick);
     
-    dom.ideaButton.addEventListener('click', () => { state.isProgrammaticChange = true; let lastElement = dom.editor.lastElementChild; let newIdea; let lastKnownIdeaText = (lastElement && lastElement.classList.contains('suggested-idea')) ? lastElement.textContent : null; do { newIdea = IDEAS[state.currentLang][Math.floor(Math.random() * IDEAS[state.currentLang].length)]; } while (newIdea === lastKnownIdeaText && IDEAS[state.currentLang].length > 1); if (lastElement && lastElement.classList.contains('suggested-idea')) { lastElement.textContent = newIdea; } else { const newIdeaSpan = document.createElement('span'); newIdeaSpan.className = 'suggested-idea'; newIdeaSpan.textContent = newIdea; if (dom.editor.innerHTML.trim() !== '' && !dom.editor.innerHTML.trim().endsWith('<br>')) { dom.editor.append(document.createElement('br'), document.createElement('br')); } dom.editor.append(newIdeaSpan); } debouncedSaveAndStats(); setCaretAtEnd(); state.isProgrammaticChange = false; });
+    dom.ideaButton.addEventListener('click', () => { state.isProgrammaticChange = true; let lastElement = dom.editor.lastElementChild; let newIdea; let lastKnownIdeaText = (lastElement && lastElement.classList.contains('suggested-idea')) ? lastElement.textContent : null; do { newIdea = IDEAS[state.currentLang][Math.floor(Math.random() * IDEAS[state.currentLang].length)]; } while (newIdea === lastKnownIdeaText && IDEAS[state.currentLang].length > 1); if (lastElement && lastElement.classList.contains('suggested-idea')) { lastElement.textContent = newIdea; } else { const newIdeaSpan = document.createElement('span'); newIdeaSpan.className = 'suggested-idea'; newIdeaSpan.textContent = newIdea; if (dom.editor.innerHTML.trim() !== '' && !dom.editor.innerHTML.trim().endsWith('<br>')) { dom.editor.append(document.createElement('br'), document.createElement('br')); } dom.editor.append(newIdeaSpan); } debouncedSave(); setCaretAtEnd(); state.isProgrammaticChange = false; });
     
     dom.themeSwitcher.addEventListener('click', () => { const newTheme = dom.html.classList.contains('dark-theme') ? 'light' : 'dark'; localStorage.setItem('writer-app-theme', newTheme); applyTheme(newTheme); });
     dom.languageSwitcher.addEventListener('click', () => { const newLang = state.currentLang === 'ru' ? 'en' : 'ru'; localStorage.setItem('writer-app-lang', newLang); applyLanguage(newLang); });
