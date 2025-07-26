@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Поток | Финальная версия</title>
     
-    <!-- ИСПРАВЛЕНИЕ: Добавлена ссылка на иконку для вкладок, закладок и PWA -->
     <link rel="icon" href="icons/icon-192.png">
 
     <!-- ================== PWA и Мобильные улучшения: НАЧАЛО ================== -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
     
-    <!-- ИСПРАВЛЕНИЕ: Добавлен новый стандартный мета-тег, старый оставлен для совместимости -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes"> 
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -36,18 +34,17 @@
         <main>
             <div id="editor" contenteditable="true" data-lang-key="editor_placeholder" placeholder="Начните писать здесь..."></div>
             <button id="idea-button" class="btn btn-secondary" title="Предложить идею" data-lang-key="btn_idea">Идея</button>
-            <button id="copy-editor-button" class="btn btn-secondary" title="Копировать текст" data-lang-key="btn_copy">Копировать</button>
+            <button id="copy-editor-button" class="btn btn-secondary desktop-only" title="Копировать текст" data-lang-key="btn_copy">Копировать</button>
         </main>
         
-        <!-- НОВЫЙ ЭЛЕМЕНТ: Индикатор прогресса, изначально скрыт -->
         <div id="progress-container" class="hidden">
             <div id="progress-bar"></div>
         </div>
 
         <div class="stats-bar">
-            <span data-lang-key="stats_chars">Символы</span>: <span id="char-count">0</span>
-            <span data-lang-key="stats_words">Слова</span>: <span id="word-count">0</span>
-            <span data-lang-key="stats_pages">Страницы</span>: <span id="page-count">0</span>
+            <div><span data-lang-key="stats_chars">Символы</span>: <span id="char-count">0</span></div>
+            <div><span data-lang-key="stats_words">Слова</span>: <span id="word-count">0</span></div>
+            <div><span data-lang-key="stats_pages">Страницы</span>: <span id="page-count">0</span></div>
         </div>
 
         <div class="main-actions-wrapper">
@@ -108,6 +105,8 @@
                     </div>
                 </div>
             </div>
+            <!-- Мобильная кнопка копирования -->
+            <button id="mobile-copy-editor-button" class="btn btn-secondary mobile-only" data-lang-key="btn_copy">Копировать</button>
             <button id="save-button" class="btn btn-primary" data-lang-key="btn_save">Сохранить</button>
         </div>
     </div>
