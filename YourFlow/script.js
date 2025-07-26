@@ -47,9 +47,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
     // =================================================================================
     const debounce = (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; };
-    const saveSelection = () => window.getSelection().rangeCount > 0 ? window.getSelection().getRangeAt(0) : null;
-    const restoreSelection = (range) => { if (range) { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } };
-    const setCaretAtEnd = () => { const range = document.createRange(); const sel = window.getSelection(); range.selectNodeContents(dom.editor); range.collapse(false); sel.removeAllRanges(); sel.addRange(range); };
+    const setCaretAtEnd = () => {
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(dom.editor);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        dom.editor.focus();
+    };
 
     // =================================================================================
     // 5. ОСНОВНАЯ ЛОГИКА ПРИЛОЖЕНИЯ
@@ -100,13 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'shake' || type === 'impossible') dom.body.classList.add('punishment-shake-active');
     };
     
-    // ИСПРАВЛЕНО: Возвращено сохранение и восстановление курсора
     const punishBySurgicalDeletion = () => {
-        const savedRange = saveSelection();
         let lastNode = dom.editor.lastChild;
         while(lastNode) {
             if (lastNode.nodeType === Node.TEXT_NODE && lastNode.textContent.length > 0) {
-                lastNode.textContent = lastNode.textContent.slice(0, -1);
+                const nodeValue = lastNode.nodeValue;
+                // Вместо замены всего текста, используем deleteData для минимального воздействия
+                lastNode.deleteData(nodeValue.length - 1, 1);
                 break;
             }
             if (lastNode.nodeType === Node.ELEMENT_NODE && lastNode.tagName === 'BR') {
@@ -124,16 +130,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         updateStats();
-        restoreSelection(savedRange);
+        // ИСПРАВЛЕНО: Принудительно ставим курсор в конец, чтобы избежать прыжка
+        setCaretAtEnd();
     };
 
     const punishByDeletion = () => { clearInterval(state.punishmentInterval); const speed = parseInt(dom.deleteSpeedInput.value, 10) || 3; dom.editor.classList.add('punishment-deleting'); state.punishmentInterval = setInterval(punishBySurgicalDeletion, 1000 / speed); };
     
-    // ИСПРАВЛЕНО: Возвращено сохранение и восстановление курсора
     const punishBySoft = () => {
         clearInterval(state.punishmentInterval);
         state.punishmentInterval = setInterval(() => {
-            const savedRange = saveSelection();
             const walker = document.createTreeWalker(dom.editor, NodeFilter.SHOW_TEXT, null, false);
             let nodes = [];
             while (walker.nextNode()) nodes.push(walker.currentNode);
@@ -150,7 +155,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         const span = document.createElement('span');
                         span.className = 'punishment-word';
                         range.surroundContents(span);
-                        restoreSelection(savedRange);
+                        // ИСПРАВЛЕНО: Принудительно ставим курсор в конец, чтобы избежать прыжка
+                        setCaretAtEnd();
                         return;
                     }
                 }
@@ -172,13 +178,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mode === 'sprint') {
             const duration = (parseInt(dom.sprintDurationInput.value, 10) || 25) * 60 * 1000;
             const startTime = Date.now();
-            dom.progressBar.style.width = '100%'; // ИСПРАВЛЕНО: Начинаем с полной шкалы
+            dom.progressBar.style.width = '100%'; // Начинаем с полной шкалы
             state.sessionTimer = setTimeout(() => completeSession(LANG_DATA[state.currentLang].modal_sprint_title), duration);
             
             clearInterval(state.sessionProgressInterval);
             state.sessionProgressInterval = setInterval(() => {
                 const elapsed = Date.now() - startTime;
-                // ИСПРАВЛЕНО: Шкала опустошается, а не заполняется
                 const percentage = 100 - (elapsed / duration) * 100;
                 dom.progressBar.style.width = `${Math.max(0, percentage)}%`;
             }, 1000);
