@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         settingsContainer: document.getElementById('settings-container'), settingsHeader: document.getElementById('settings-header'),
         progressContainer: document.getElementById('progress-container'),
         progressBar: document.getElementById('progress-bar'),
+        showProgressToggle: document.getElementById('show-progress-toggle'), // Новый элемент
         successModal: document.getElementById('success-modal'), successTitleEl: document.getElementById('success-title'),
         successMessageEl: document.getElementById('success-message'), closeModalButton: document.getElementById('close-modal-button'),
     };
@@ -31,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const IDEAS = { ru: [ "Что если бы главный герой мог слышать мысли животных, но только тех, которые его недолюбливают?", "Что если бы однажды все тени людей начали жить своей жизнью?", "Что если бы технологии научились материализовывать эмоции?", "Что если бы все зеркала в мире в одночасье стали порталами в случайные места?", "Что если бы вы проснулись в мире, где никто не помнит о вашем существовании, кроме одного незнакомца?", "Что если бы Земля перестала вращаться, но только на одной половине планеты?", "Что если бы вы могли пережить заново один любой день своей жизни, но с последствиями для будущего?", "Что если бы все написанные на бумаге слова можно было съесть, и они давали бы вам знания, которые содержат?", "Что если бы ложь физически оставляла на человеке видимый след, например, шрам?", "Что если бы у людей появился орган, который позволяет им чувствовать ближайшее будущее, но не видеть его?", "Что если бы гравитация стала переменной и зависела бы от настроения людей в данной местности?" ], en: [ "What if the main character could hear animal thoughts, but only from those who dislike them?", "What if one day, everyone's shadows started living their own lives?", "What if technology learned to materialize emotions?", "What if all the mirrors in the world suddenly became portals to random places?", "What if you woke up in a world where no one remembers your existence, except for one stranger?", "What if Earth stopped rotating, but only on one hemisphere?", "What if you could relive any single day of your life, but it would have consequences for the future?", "What if all words written on paper could be eaten, and they would grant you the knowledge they contain?", "What if lying physically left a visible mark on a person, like a scar?", "What if humans developed an organ that allowed them to feel the immediate future, but not see it?", "What if gravity became variable, depending on the mood of the people in the area?" ]};
     const CONGRATS_MESSAGES = { ru: [ "Вы великолепны! Поток был с вами.", "Отличная работа!", "Задача выполнена. Вы — литературный титан!", "Вы это сделали! Муза аплодирует стоя.", "Превосходно!", "Невероятно! Вы победили прокрастинацию." ], en: [ "You are magnificent! The flow was with you.", "Excellent work!", "Task complete. You are a literary titan!", "You did it! The muse gives a standing ovation.", "Outstanding!", "Incredible! You have defeated procrastination." ]};
     const LANG_DATA = {
-        ru: { title: "Поток", subtitle: "Начните писать, чтобы войти в режим фокуса.", editor_placeholder: "Начните писать здесь...", stats_chars: "Символы", stats_words: "Слова", stats_pages: "Страницы", settings_header: "Настройки", label_mode: "Режим", option_classic: "Классический", option_sprint: "Спринт (время)", option_drive: "Драйв (знаки)", label_sprint_duration: "Длительность (мин)", label_drive_goal: "Цель (знаков)", label_punishment: "Наказание", option_delete: "Удаление", option_soft: "Красные слова", option_shake: "Тряска", option_hardcore: "Ни шагу назад", option_impossible: "Страх и голод", label_wait_time: "Ожидание (сек)", label_delete_speed: "Скорость (зн/сек)", group_title_session: "Режим Сессии", group_title_app: "Настройки Приложения", btn_idea: "Идея", btn_save: "Сохранить", btn_copy: "Копировать", btn_copied: "Скопировано!", btn_stop: "Остановить", modal_goal_title: "Цель достигнута!", modal_sprint_title: "Время вышло!", btn_modal_continue: "Продолжить" },
-        en: { title: "The Flow", subtitle: "Start typing to enter focus mode.", editor_placeholder: "Start writing here...", stats_chars: "Characters", stats_words: "Words", stats_pages: "Pages", settings_header: "Settings", label_mode: "Mode", option_classic: "Classic", option_sprint: "Sprint (time)", option_drive: "Drive (chars)", label_sprint_duration: "Duration (min)", label_drive_goal: "Goal (chars)", label_punishment: "Punishment", option_delete: "Deletion", option_soft: "Red Words", option_shake: "Shaking", option_hardcore: "No Step Back", option_impossible: "Fear and Hunger", label_wait_time: "Idle Time (sec)", label_delete_speed: "Speed (char/s)", group_title_session: "Session Mode", group_title_app: "Application Settings", btn_idea: "Idea", btn_save: "Save", btn_copy: "Copy", btn_copied: "Copied!", btn_stop: "Stop", modal_goal_title: "Goal Reached!", modal_sprint_title: "Time's Up!", btn_modal_continue: "Continue" }
+        ru: { title: "Поток", subtitle: "Начните писать, чтобы войти в режим фокуса.", editor_placeholder: "Начните писать здесь...", stats_chars: "Символы", stats_words: "Слова", stats_pages: "Страницы", settings_header: "Настройки", label_mode: "Режим", option_classic: "Классический", option_sprint: "Спринт (время)", option_drive: "Драйв (знаки)", label_sprint_duration: "Длительность (мин)", label_drive_goal: "Цель (знаков)", label_punishment: "Наказание", option_delete: "Удаление", option_soft: "Красные слова", option_shake: "Тряска", option_hardcore: "Ни шагу назад", option_impossible: "Страх и голод", label_wait_time: "Ожидание (сек)", label_delete_speed: "Скорость (зн/сек)", group_title_session: "Режим Сессии", group_title_app: "Настройки Приложения", btn_idea: "Идея", btn_save: "Сохранить", btn_copy: "Копировать", btn_copied: "Скопировано!", btn_stop: "Остановить", modal_goal_title: "Цель достигнута!", modal_sprint_title: "Время вышло!", btn_modal_continue: "Продолжить", label_show_progress: "Показывать шкалу прогресса" },
+        en: { title: "The Flow", subtitle: "Start typing to enter focus mode.", editor_placeholder: "Start writing here...", stats_chars: "Characters", stats_words: "Words", stats_pages: "Pages", settings_header: "Settings", label_mode: "Mode", option_classic: "Classic", option_sprint: "Sprint (time)", option_drive: "Drive (chars)", label_sprint_duration: "Duration (min)", label_drive_goal: "Goal (chars)", label_punishment: "Punishment", option_delete: "Deletion", option_soft: "Red Words", option_shake: "Shaking", option_hardcore: "No Step Back", option_impossible: "Fear and Hunger", label_wait_time: "Idle Time (sec)", label_delete_speed: "Speed (char/s)", group_title_session: "Session Mode", group_title_app: "Application Settings", btn_idea: "Idea", btn_save: "Save", btn_copy: "Copy", btn_copied: "Copied!", btn_stop: "Stop", modal_goal_title: "Goal Reached!", modal_sprint_title: "Time's Up!", btn_modal_continue: "Continue", label_show_progress: "Show progress bar" }
     };
 
     // =================================================================================
@@ -41,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let state = {
         inactivityTimer: null, punishmentInterval: null, sessionTimer: null, sessionProgressInterval: null,
         isWritingSessionLive: false, isProgrammaticChange: false, currentLang: 'ru',
+        showProgressBar: true, // Новое состояние
     };
 
     // =================================================================================
@@ -167,7 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
         enterFocusMode();
         armPunishmentTimer();
         
-        if (mode === 'sprint' || mode === 'drive') {
+        // ИЗМЕНЕНО: Добавлена проверка на state.showProgressBar
+        if ((mode === 'sprint' || mode === 'drive') && state.showProgressBar) {
             dom.progressContainer.classList.remove('hidden');
         }
 
@@ -298,6 +301,16 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.modeSelect.addEventListener('change', handleModeChange);
     dom.punishmentSelect.addEventListener('change', handlePunishmentChange);
     
+    // Новый обработчик для чекбокса
+    dom.showProgressToggle.addEventListener('change', (e) => {
+        state.showProgressBar = e.target.checked;
+        localStorage.setItem('writer-app-show-progress', state.showProgressBar);
+        // Если сессия активна, немедленно скрыть/показать шкалу
+        if (state.isWritingSessionLive && (dom.modeSelect.value === 'sprint' || dom.modeSelect.value === 'drive')) {
+            dom.progressContainer.classList.toggle('hidden', !state.showProgressBar);
+        }
+    });
+    
     // =================================================================================
     // 7. ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
     // =================================================================================
@@ -308,7 +321,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const savedTheme = localStorage.getItem('writer-app-theme') || 'light';
         const savedLang = localStorage.getItem('writer-app-lang') || 'ru';
-
+        
+        // Загружаем настройку шкалы прогресса
+        const savedProgressPref = localStorage.getItem('writer-app-show-progress');
+        state.showProgressBar = savedProgressPref !== null ? savedProgressPref === 'true' : true; // По умолчанию true
+        dom.showProgressToggle.checked = state.showProgressBar;
+        
         applyTheme(savedTheme);
         applyLanguage(savedLang);
 
