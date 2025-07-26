@@ -102,7 +102,7 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
 #stop-session-button { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 200px; z-index: 100; flex: none; }
 .stop-btn-icon { display: none; font-size: 1.5rem; line-height: 1; }
 
-.focus-mode header, .focus-mode .stats-bar, .focus-mode .main-actions-wrapper, .focus-mode #progress-container { opacity: 0; visibility: hidden; max-height: 0; margin: 0 !important; padding: 0 !important; border: none; }
+.focus-mode header, .focus-mode .stats-bar, .focus-mode .main-actions-wrapper { opacity: 0; visibility: hidden; max-height: 0; margin: 0 !important; padding: 0 !important; border: none; }
 .focus-mode #copy-editor-button, .focus-mode #idea-button { display: none; }
 .hidden { display: none !important; }
 
