@@ -20,6 +20,14 @@ body {
     font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color);
     display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px;
 }
+#progress-bar {
+    position: fixed; top: 0; left: 0;
+    height: 3px; width: 0;
+    background-color: var(--accent-color);
+    z-index: 9999;
+    transition: width 0.2s ease-out;
+    display: none; /* Управляется через JS */
+}
 .container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 15px; }
 @keyframes shake-animation { 0% { transform: translate(1px, 1px); } 10% { transform: translate(-1px, -2px); } 20% { transform: translate(-3px, 0px); } 30% { transform: translate(3px, 2px); } 40% { transform: translate(1px, -1px); } 50% { transform: translate(-1px, 2px); } 60% { transform: translate(-3px, 1px); } 70% { transform: translate(3px, 1px); } 80% { transform: translate(-1px, -1px); } 90% { transform: translate(1px, 2px); } 100% { transform: translate(1px, -2px); } }
 body.punishment-shake-active { animation: shake-animation 0.5s linear infinite; background-color: var(--danger-color-bg, #ffebee); }
@@ -33,9 +41,9 @@ main { position: relative; }
     border: 2px solid var(--secondary-color); border-radius: var(--border-radius);
     font-size: 1.1rem; line-height: 1.6; resize: vertical; transition: all 0.3s ease;
     overflow-y: auto; background-color: var(--primary-color); color: var(--text-color);
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
 }
-#editor::-webkit-scrollbar { display: none; /* Safari and Chrome */ }
+#editor::-webkit-scrollbar { display: none; }
 #editor:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 10px var(--shadow-color); }
 #editor:empty:before { content: attr(placeholder); color: var(--text-color); opacity: 0.5; cursor: text; }
 #editor .punishment-word { color: var(--soft-punishment-color); }
@@ -53,7 +61,7 @@ main:hover #copy-editor-button, #copy-editor-button:hover,
 main:hover #idea-button, #idea-button:hover { opacity: 1; }
 
 .stats-bar { display: flex; justify-content: space-around; background: var(--primary-color); padding: 10px; border-radius: var(--border-radius); border: 1px solid var(--secondary-color); font-size: 0.9rem; font-weight: 500; transition: all 0.4s ease; }
-.settings-container { flex-grow: 1; border-radius: var(--border-radius); border: 1px solid var(--secondary-color); background: var(--primary-color); overflow: hidden; transition: all 0.4s ease; }
+.settings-container { flex-grow: 1; width: 100%; border-radius: var(--border-radius); border: 1px solid var(--secondary-color); background: var(--primary-color); overflow: hidden; transition: all 0.4s ease; }
 .settings-header { padding: 15px; font-size: 1.2rem; font-weight: 500; color: var(--accent-color); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
 .settings-header .arrow { transition: transform 0.3s ease; }
 .controls-wrapper { max-height: 1000px; transition: max-height 0.5s ease-in-out, opacity 0.5s ease, padding 0.5s ease; opacity: 1; padding: 0 15px 15px 15px; }
@@ -62,8 +70,11 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
 
 .control-group { display: flex; flex-direction: column; gap: 8px; }
 .control-group label { font-weight: 500; color: var(--accent-color); }
-.control-group select, .control-group input { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid var(--secondary-color); background-color: var(--bg-color); color: var(--text-color); }
+.control-group select, .control-group input[type="number"], .control-group input[type="text"] { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid var(--secondary-color); background-color: var(--bg-color); color: var(--text-color); }
 .control-group select:focus, .control-group input:focus { border-color: var(--accent-color); outline: none; }
+.checkbox-label { flex-direction: row; align-items: center; cursor: pointer; color: var(--text-color); font-weight: normal;}
+.checkbox-label input[type="checkbox"] { width: auto; margin-right: 10px; }
+
 
 .btn { flex: 1; border: none; padding: 12px; border-radius: var(--border-radius); font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 5px var(--shadow-color); display: flex; align-items: center; justify-content: center; gap: 8px; }
 .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow-color); }
@@ -80,12 +91,7 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
 .settings-section-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
 .button-row { display: flex; flex-wrap: wrap; gap: 10px; }
 
-/* ИЗМЕНЕНИЕ ЗДЕСЬ */
-.main-actions-wrapper {
-    display: flex;
-    flex-direction: column; /* Элементы теперь выстраиваются в колонку */
-    gap: 10px;
-}
+.main-actions-wrapper { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
 
 #stop-session-button { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 200px; z-index: 100; flex: none; }
 .stop-btn-icon { display: none; font-size: 1.5rem; line-height: 1; }
@@ -94,9 +100,23 @@ main:hover #idea-button, #idea-button:hover { opacity: 1; }
 .focus-mode #copy-editor-button, .focus-mode #idea-button { display: none; }
 .hidden { display: none !important; }
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background: var(--primary-color); padding: 40px; border-radius: var(--border-radius); text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.2); max-width: 90%; }
+.modal-content { background: var(--primary-color); padding: 30px; border-radius: var(--border-radius); text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.2); max-width: 90%; width: 500px; display: flex; flex-direction: column; }
 .modal-content h2 { color: var(--success-color); margin-bottom: 15px; font-size: 2rem; }
 .modal-content p { margin-bottom: 25px; font-size: 1.2rem; }
+#drafts-modal .modal-content h2 { color: var(--accent-color); }
+
+/* Стили для модального окна черновиков */
+#new-draft-controls { display: flex; gap: 10px; margin-bottom: 20px; }
+#new-draft-name { flex-grow: 1; }
+#add-new-draft-button { flex-shrink: 0; flex-grow: 0; }
+#drafts-list { list-style: none; margin: 0; padding: 0; max-height: 40vh; overflow-y: auto; text-align: left; margin-bottom: 20px; border: 1px solid var(--secondary-color); border-radius: var(--border-radius); }
+#drafts-list::-webkit-scrollbar { display: none; }
+#drafts-list { scrollbar-width: none; }
+#drafts-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--secondary-color); }
+#drafts-list li:last-child { border-bottom: none; }
+#drafts-list .draft-name { font-weight: 500; }
+#drafts-list .draft-actions { display: flex; gap: 8px; }
+#drafts-list .btn { padding: 5px 10px; font-size: 0.8rem; flex-grow: 0; }
 
 @media (max-width: 768px) {
     #stop-session-button { left: 15px; transform: none; width: 55px; height: 55px; padding: 0; }
